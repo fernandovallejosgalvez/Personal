@@ -1,0 +1,643 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK ****************************************/
+\/******************************************************************/
+\/*                                                                */
+\/*      MODULE NAME: EAMTOPTS                                     */
+\/*                                                                */
+\/*      DESCRIPTIVE NAME:  VARIABLE DEFINITIONS FOR TERMINAL      */
+\/*                         OPTIONS PROCESSING.                    */
+\/*                                                                */
+\/*      CHANGE ACTIVITY:                                          */
+\/*                                                                */
+\/*         IR95766 - CORRECTED COMMENT FOR TO.ACCOUNTABILITY      */
+\/*                   VARIABLE.                                    */
+\/*     LAST APARS closed before cut:                              */
+\/*                                                                */
+\/*          IR91030                                               */
+\/*          IR90981                                               */
+\/*          IR89487                                               */
+\/*          IR89688                                               */
+\/*                                                                */
+\/*     Modified for Supermarket Application Version 2             */
+\/*                                                                */
+\/* IR43570  Add variables TO.NO.KEYED.WGT.SCALE.ZERO &            */
+\/*          TO.NO.KEYED.WGT.WO.SCALE (record 8, fields 59, 60)    */
+\/*          RSH IBM 04Aug00                                       */
+\/*                                                                */
+\/* IO00464  Add support for WIC program for Texas.                */
+\/*          KHG IBM 24Sep04                                       */
+\/*                                                                */
+\/* END-OF-SPECIFICATIONS ******************************************/
+\/******************************************************************/
+!********************************************************************
+!*                                                                  *
+!*   THIS MODULE CONTAINS VARIABLE DEFINITIONS FOR THE FIELDS READ  *
+!*   FROM THE TERMINAL OPTIONS RECORSS. THIS MODULE SHOULD BE       *
+!*   INCLUDED IN ANY PROGRAM NEEDING ACCESS TO THE TERMINAL OPTIONS.*
+!*   VARIABLES ARE INITIALISED BY READING THE TERMINAL OPTIONS      *
+!*   RECORDS USING INCLUDE MODULES EAMTORDX.                        *
+!*                                                                  *
+!*   IN THE FIELD DESCRIPTIONS BELOW, (Y/N) INDICATES A FLAG WHICH  *
+!*   CAN TAKE THE VALUE OF 0 (=NO) OR -1 (= YES)                    *
+!*                                                                  *
+!********************************************************************
+
+!********************************************************************
+!*        ENTRY LIMITS BY DEPARTMENT GROUP                          *
+!********************************************************************
+
+INTEGER*4 GLOBAL              \
+                              \
+          TO.DEPTLIMITS(2)    \    KEY ENTRY LIMITS BY DEPARTMENT BY
+                              \    SALES TYPE. INDEX IS (G,T) WHERE:
+                              \    G = GROUP NO, 0 = ALL OTHERS
+                              \    T = LIMIT TYPE:
+                              \        1 = MAXIMUM PRICE
+                              \        2 = MINIMUM PRICE
+                              \        3 = QUANTITY LIMIT
+                              \        4 = REFUND LIMIT
+                              \        5 = DEPOSIT RETURN LIMIT
+                              \        6 = STORE COUPON LIMIT
+                              !        7 = MFR COUPON LIMIT
+
+!********************************************************************
+!*        DEPARTMENT NUMBER GROUP ASSIGNMENT                        *
+!********************************************************************
+
+INTEGER*2 GLOBAL              \
+                              \
+          TO.DEPTGROUP(2)     \    DEPARTMENT NO GROUP ASSIGNMENT
+                              \    INDEX IS (G,D) WHERE:
+                              \    G = GROUP NO
+                              \    D = DEPARTMENT NO ASSIGNED TO THIS
+                              \        GROUP
+
+!********************************************************************
+!*        MAXIMUM NEGATIVE ENTRY AMOUNTS                            *
+!********************************************************************
+
+INTEGER*4 GLOBAL              \
+                              \
+          TO.NEGAMT(1)        \    NEGATIVE ENTRY LIMIT AMOUNTS
+                              \      0 = GROUP LIMIT
+                              \      1 = ITEM SALES CANCELS
+                              \      2 = REFUNDS
+                              \      3 = STORE COUPONS
+                              \      4 = MANUFACTURER COUPONS
+                              \      5 = CANCEL DEPOSITS
+                              \      6 = DEPOSIT RETURNS
+                              !      7 = PAID OUTS
+
+!********************************************************************
+!*        MAXIMUM NEGATIVE ENTRY COUNT LIMITS                       *
+!********************************************************************
+
+INTEGER*2 GLOBAL              \
+                              \
+          TO.NEGCNT(1)        \    NEGATIVE ENTRY LIMIT COUNTS
+                              \      0 = GROUP LIMIT
+                              \      1 = ITEM SALES CANCELS
+                              \      2 = REFUNDS
+                              \      3 = STORE COUPONS
+                              \      4 = MANUFACTURER COUPONS
+                              \      5 = CANCEL DEPOSITS
+                              \      6 = DEPOSIT RETURNS
+                              !      7 = PAID OUTS
+
+!********************************************************************
+!*        NEGATIVE ENTRY GROUP FLAGS                                *
+!********************************************************************
+!
+INTEGER*1 GLOBAL              \
+                              \
+          TO.NEGGRP(1)        \    NEGATIVE ENTRY GROUP FLAGS
+                              \      0 = NOT USED
+                              \      1 = ITEM SALES CANCELS INCLUDED    (Y/N)
+                              \      2 = REFUNDS INCLUDED               (Y/N)
+                              \      3 = STORE COUPONS INCLUDED         (Y/N)
+                              \      4 = MANUFACTURER COUPONS INCLUDED  (Y/N)
+                              \      5 = CANCEL DEPOSITS INCLUDED       (Y/N)
+                              \      6 = DEPOSIT RETURNS INCLUDED       (Y/N)
+                              !      7 = PAID OUTS INCLUDED             (Y/N)
+
+!********************************************************************
+!*        PRINT OPTION MATRIX                                       *
+!********************************************************************
+!*                                                                  *
+!*        THIS MATRIX CONTAINS OPTIONS FOR CR PRINT, DI PRINT,      *
+!*        CR/DI LINEFEED COUNTS, SJ PRINT AND SJ PRINT OVER LOG     *
+!*        LIMIT INDEXED ON TRANSACTION TYPE:                        *
+!*                                                                  *
+!*        1  ITEM SALES                                             *
+!*        2  CANCEL ITEM SALES                                      *
+!*        3  DEPOSITS                                               *
+!*        4  CANCEL DEPOSITS                                        *
+!*        5  REFUNDS/CANCEL REFUNDS                                 *
+!*        6  DEPOSIT RETURNS/CANCEL DEPOSIT RETURNS                 *
+!*        7  STORE COUPONS/CANCEL STORE COUPONS                     *
+!*        8  MANUFACTURER COUPONS/CANCEL MANUFACTURER COUPONS       *
+!*        9  MISCELLANEOUS RECEIPTS/CANCEL RECEIPTS                 *
+!*       10  MISCELLANEOUS PAYOUTS/CANCEL PAYOUTS                   *
+!*       11  MANAGER OVERRIDES                                      *
+!*       12  OPERATOR OVERRIDES                                     *
+!*       13  PRICE OVERRIDES                                        *
+!*       14  TRANSACTION DISCOUNTS                                  *
+!*       15  TAX EXEMPTION                                          *
+!*       16  DISCOUNT RATE                                          *
+!*       17  TOTAL TO ACCOUNT FOR AT SIGN-ON                        *
+!*       18  TOTAL TO ACCOUNT FOR AT EOT                            *
+!*       19  TENDER ENTRIES                                         *
+!*       20  CHANGE DUE                                             *
+!*       21  CUSTOMER ACCOUNT NUMBER                                *
+!*       22  VOID TRANSACTION TOTAL                                 *
+!*       23  MANUAL WEIGHT ENTRIES                                  *
+!*       24  CHECK/TENDER FEES                                      *
+!*       25  TRANSACTION DATA ENTRY                                 *
+!*       26  ENTRY INTO STANDALONE MODE                             *
+!*       27  ITEM ENTRY LIMIT ERROR                                 *
+!*       28  CLOSEOUT LIMIT ERROR                                   *
+!*                                                                  *
+!*       OPTION TYPE:                                               *
+!*                                                                  *
+!*       0   PRINT ON CUSTOMER RECEIPT                              *
+!*       1   PRINT ON DOCUMENT INSERT                               *
+!*       2   LINEFEED COUNT FOR CUSTOMER RECEIPT/DOCUMENT INSERT    *
+!*       3   PRINT ON SUMMARY JOURNAL                               *
+!*       4   PRINT ON SUMMARY JOURNAL IF OVER LOGGING LIMIT         *
+!*                                                                  *
+!********************************************************************
+
+INTEGER*1 GLOBAL              \
+                              \
+          TO.PRNTOPTS(2)      !    PRINT OPTION MATRIX
+
+!********************************************************************
+!*        OTHER CUSTOMER RECEIPT PRINT OPTIONS                      *
+!********************************************************************
+
+INTEGER*1 GLOBAL              \
+                              \
+          TO.PRTCRCOUP,       \    PRINT COUPON AT EOT          (Y/N)
+          TO.PRTCRTSTMP,      \    PRINT TRADING STAMPS AT EOT  (Y/N)
+          TO.PRTCRTAX,        \    PRINT TAX PAID AT EOT        (Y/N)
+          TO.PRTCREFT         !    PRINT EFT RECEIPT            (Y/N)
+
+!********************************************************************
+!*        OTHER DOCUMENT INSERT PRINT OPTIONS                       *
+!********************************************************************
+
+INTEGER*1 GLOBAL              \
+                              \
+          TO.PRTDIEFT         !    PRINT EFT RECEIPT            (Y/N)
+
+
+
+
+!********************************************************************
+!*        EXCEPTION LOGGING OPTIONS                                 *
+!*                                                                  *
+!*        1  DEPOSITS                                               *
+!*        2  REFUNDS                                                *
+!*        3  DEPOSIT RETURNS                                        *
+!*        4  MISCELLANEOUS RECEIPTS                                 *
+!*        5  MISCELLANEOUS PAYOUTS                                  *
+!*        6  MANUFACTURER COUPONS                                   *
+!*        7  STORE COUPONS                                          *
+!*        8  ITEM CANCELS                                           *
+!*        9  DEPOSIT CANCELS                                        *
+!*                                                                  *
+!********************************************************************
+
+INTEGER*4 GLOBAL              \
+                              \
+          TO.LOGLIMITS(1)     !    EXCEPTION LOGGING THRESHOLDS
+
+!********************************************************************
+!*        ITEM LOOKUP KEYS                                          *
+!********************************************************************
+
+STRING    GLOBAL              \
+                              \
+          TO.LUCODE$(1)       !    ITEM LOOKUP CODE STRINGS
+
+INTEGER*1 GLOBAL              \
+                              \
+          TO.LUKEYS(2)        \    LOOKUP KEY MATRIX. SPECIFIES VALID
+                              \    KEYS FOR USE WITH LOOKUP KEY:
+                              \      0 = TAX KEY
+                              \      1 = FOODSTAMP KEY
+                              \      2 = REFUND KEY
+                              \      3 = MANUFACTURER COUPON KEY
+                              !      4 = STORE COUPON KEY
+
+!********************************************************************
+!*        MANAGER OVERRIDE NUMBERS                                  *
+!********************************************************************
+
+INTEGER*4 GLOBAL              \
+                              \
+          TO.OVRIDNUM(1)      !    MANAGERS OVERRIDE NUMBERS
+
+!********************************************************************
+!*        MANAGER OVERRIDE CONTROLS                                 *
+!********************************************************************
+
+INTEGER*1 GLOBAL              \
+                              \
+          TO.NEGLIMDPT,       \    NEGATIVE LIMITS BY DEPT      (Y/N)
+          TO.NEGLIMTRX,       \    NEGATIVE LIMITS BY TRX       (Y/N)
+          TO.MISCTRX,         \    MISCELLANEOUS TRX LIMIT      (Y/N)
+          TO.LOANPKUP,        \    LOAN AND PICKUP LIMITS       (Y/N)
+          TO.VOIDTRX,         \    VOID TRANSACTION LIMIT       (Y/N)
+          TO.PRCOVRID,        \    PRICE OVERRIDEL LIMITS       (Y/N)
+          TO.TENDERCHG,       \    TENDER CHANGE LIMITS         (Y/N)
+          TO.CANCELPREV,      \    CANCEL ITEM FROM PREV TRX    (Y/N)
+          TO.VERFYLIMIT,      \    TENDER VERIFY LIMIT          (Y/N)
+          TO.TNDRVERFY,       \    TENDER VERIFY REJECTION      (Y/N)
+          TO.EFTREJECT,       \    EFT VERIFY REJECTION         (Y/N)
+          TO.TENDERCNT,       \    NUMBER OF TENDERS LIMIT      (Y/N)
+          TO.XCHGLIM,         \    TENDER EXCHANGE LIMIT        (Y/N)
+          TO.FEEREFUND,       \    TENDER FEE REFUND LIMIT      (Y/N)
+          TO.WGTOVRID,        \    WEIGHT OVERRIDE LIMIT        (Y/N)
+          TO.DISCLIMITS,      \    DISCOUNT/EXEMPTION LIMITS    (Y/N)
+          TO.SSONOPSWD,       \    SPEICAL SIGN ON W/O PSWD     (Y/N)
+          TO.COUPVALUE,       \    COUP VALUE > SALES VALUE     (Y/N)
+          TO.MFRLOOKUP,       \    MFR COUPON WITH LOOKUP KEY   (Y/N)
+          TO.STRLOOKUP        !    STR COUPON WITH LOOKUP KEY
+
+!********************************************************************
+!*        MISCELLANEOUS TRANSACTION CONTROLS                        *
+!********************************************************************
+
+INTEGER*4 GLOBAL              \
+                              \
+          TO.MISCMAX,         \    MISC TRX MAXIMUM AMOUNT
+          TO.MISCMIN,         \    MISC TRX MINIMUM AMOUNT
+          TO.MISCREF          !    MISC TRX REFUND LIMIT
+
+INTEGER*2 GLOBAL              \
+                              \
+          TO.MISCQTY          !    MISC TRX MAXIMUM QUANTITY
+
+!********************************************************************
+!*        LOANS AND PICKUP OPTIONS                                  *
+!********************************************************************
+
+INTEGER*4 GLOBAL              \
+                              \
+          TO.AUTOCASH,        \    AUTO LOAN AMOUNT  - CASH
+          TO.AUTOFSTAMP,      \    AUTO LOAN AMOUNT  - FOODSTAMP
+          TO.AUTOMISC1,       \    AUTO LOAN AMOUNT  - MISC 1
+          TO.AUTOMISC2,       \    AUTO LOAN AMOUNT  - MISC 2
+          TO.AUTOMISC3,       \    AUTO LOAN AMOUNT  - MISC 3
+          TO.MAXEXCHANGE,     \    MAXIMUM EXCHANGE AMOUNT
+          TO.MAXPICKUP,       \    MAXIMUM PICKUP AMOUNT
+          TO.MAXLOAN          !    MAXIMUM LOAN AMOUNT
+
+!********************************************************************
+!*        MISCELLANEOUS OPTIONS                                     *
+!********************************************************************
+
+INTEGER*1 GLOBAL              \
+                              \
+\AIR95766                          Correct values are (1=oprtr, 2=term)
+\         TO.ACCOUNTABILITY,  \    ACCOUNTABILITY (1 = TERMINAL, 2 = OPERATOR)
+          TO.ACCOUNTABILITY,  \    ACCOUNTABILITY (1 = OPERATOR, 2 = TERMINAL)
+\EIR95766
+          TO.MAXREPEAT,       \    MAXIMUM ENTRY REPEAT COUNT
+          TO.CDTRAINING,      \    DRAWER ACTIVE IN TRAINING    (Y/N)
+          TO.MGRKEY,          \    MANAGER KEY REQUIRED         (Y/N)
+          TO.STAMPROUND,      \    STAMP ROUNDING
+          TO.PRICEROUND,      \    PRICE ROUNDING
+          TO.CDBEGINNING,     \    DRAWER ACTIVE AT BEGIN TRAN (Y/N)
+\AIO00464
+          TO.WE.ENABLED,      \    ENABLE WIC EBT                     (Y/N)
+          TO.WE.CERTIFY.MODE, \    WIC EBT CERTIFICATION MODE ENABLED (Y/N)
+\EIO00464
+          TO.PRICEVERIFY      !    NO-SALE PRICE VERIFY ALLOWED (Y/N)
+
+INTEGER*2 GLOBAL              \
+                              \
+          TO.AUTOSIGNOFF,     \    AUTO SIGN-OFF PERIOD (SECONDS)
+          TO.AUTOPOWEROFF,    \    AUTO POWER-OFF PERIOD (SECONDS)
+          TO.AUTOPOWERON,     \    AUTO POWER-ON TIME (HHMM)
+          TO.OPENLIMIT,       \    CASH DRAWER OPEN TIME LIMIT
+          TO.STAMPRATE        !    TRADING STAMP RATE
+
+INTEGER*4 GLOBAL              \
+                              \
+          TO.CDLIMIT1,        \    FIRST CASH DRAWER LIMIT
+          TO.CDLIMIT2,        \    SECOND CASH DRAWER LIMIT
+          TO.VOIDLIMIT,       \    VOID TRANSACTION LIMIT
+          TO.PRCOVRIDLIM,     \    PRICE OVERRIDE LIMIT
+          TO.IMMOVRIDLIM      !    IMMEDIATE OVERRIDE LIMIT
+
+!********************************************************************
+!*        GENERAL TENDER OPTIONS                                    *
+!********************************************************************
+
+INTEGER*1 GLOBAL              \
+                              \
+          TO.FOODSTAMPS,      \    FOOD STAMPS USED IN SYSTEM   (Y/N)
+          TO.TNDRNUM(1),      \    ID'S OF TENDERS DEFINED
+          TO.FORMNUM(1),      \    ID'S OF FORMATS DEFINED
+          TO.RANKING(1),      \    TENDER EXCHANGE RANKING
+          TO.MANEOT(1),       \    MANUAL EOT VALID FOR TENDER
+          TO.TNDRCNT,         \    NUMBER OF TENDERS DEFINED
+          TO.FORMCNT          !    NUMBER OF FORMATS DEFINED
+
+INTEGER*4 GLOBAL              \
+                              \
+          TO.XCHGLIMIT,       \    TENDER EXCHANGE LIMIT
+          TO.FEEREFLIM        !    FEE REFUND LIMIT
+
+!********************************************************************
+!*                                                                  *
+!*        TENDER DEFINITIONS. THREE ARRAYS DEFINE THE OPTIONS FOR   *
+!*        EACH TENDER. UP TO 38 TENDERS CAN BE DEFINED.             *
+!*                                                                  *
+!*        LIMITS       -    4 BYTE INTEGERS                         *
+!*        OPTIONS      -    1 BYTE INTEGERS                         *
+!*                                                                  *
+!********************************************************************
+
+!********************************************************************
+!*        TENDER OPTIONS                                            *
+!********************************************************************
+
+INTEGER*2 GLOBAL              \
+                              \
+          TO.TENDOPTS(2)      \    OPTIONS BY TENDER TYPE BY LIMIT
+                              \    (TENDER ID, OPTION ID) WHERE:
+                              \
+                              \    TENDER ID:   TENDER POSITION (1 - N, WHERE
+                              \                 N IS NUMBER OF ACTIVE TENDERS)
+                              \
+                              \    OPTION ID:   0 = TENDER TYPE
+                              \                     1 = CASH
+                              \                     2 = CHECK
+                              \                     3 = FOODSTAMPS
+                              \                     4 = MISC 1
+                              \                     5 = MISC 2
+                              \                     6 = MISC 3
+                              \                 1 = VARIETY NUMBER
+                              \                 2 = MAX QTY
+                              \                 3 = OPEN CD     (Y/N)
+                              \                 4 = FRANKING    (Y/N)
+                              \                 5 = FORMAT NO
+                              \                 6 = EFT TENDER
+                              \                 7 = VERIFY TYPE
+                              !
+
+!********************************************************************
+!*        TENDER LIMITS                                             *
+!********************************************************************
+
+INTEGER*4 GLOBAL              \
+                              \
+          TO.TENDLIMITS(2)    \    LIMITS BY TENDER TYPE BY LIMIT
+                              \    (TENDER ID, LIMIT ID) WHERE:
+                              \
+                              \    TENDER ID:   TENDER POSITION (1 - N, WHERE
+                              \                 N IS NUMBER OF ACTIVE TENDERS)
+                              \
+                              \    LIMIT ID:    0 = MAXIMUM AMOUNT
+                              \                 1 = CHANGE LIMIT
+                              \                 2 = VERIFY LIMIT
+                              \                 3 = FEE LIMIT 1
+                              \                 4 = FEE LIMIT 2
+                              \                 5 = FEE LIMIT 3
+                              \                 6 = FEE LIMIT 4
+                              \                 7 = FEE AMOUNT 1
+                              \                 8 = FEE AMOUNT 2
+                              \                 9 = FEE AMOUNT 3
+                              \                10 = FEE AMOUNT 4
+                              !
+
+!********************************************************************
+!*        TENDER VARIETY DESCRIPTORS                                *
+!********************************************************************
+
+STRING    GLOBAL              \
+                              \
+          TO.TENDVDESC$(1)    \    TENDER VARIETY DESCRIPTOR
+                              !
+
+!********************************************************************
+!*        TENDER VARIETY EFT VALUES                                 *
+!********************************************************************
+
+INTEGER*2 GLOBAL              \
+                              \
+          TO.TENDTYPE.EXT(1)  \    TENDER VARIETY DESCRIPTOR
+                              !
+
+!********************************************************************
+!*        TENDER FRANKING FORMAT OPTIONS                            *
+!********************************************************************
+
+STRING    GLOBAL              \
+                              \
+          TO.FRANK.TXT$(2)    \    TENDER FRANKING TEXT ARRAY (N,L)
+                              \    N: FRANKING FORMAT NO (1-6)
+                              \    L: FRANKING LINE NUMBER (1-6)
+                              !
+
+INTEGER*1 GLOBAL              \
+                              \
+          TO.FRANK.LF(2)      \    TENDER FRANKING LINEFEEDS (N,L)
+                              \    N: FRANKING FORMAT NO (1-6)
+                              \    L: FRANKING LINE NUMBER (1-5)
+                              !
+
+!********************************************************************
+!*        TENDER FORMATS FOR CHEQUE PRINTING                        *
+!********************************************************************
+INTEGER*2 GLOBAL              \
+                              \
+          TO.CHEQUE.FORMAT(1) !    TENDER CHEQUE PRINT FORMAT (1-6)
+
+
+!********************************************************************
+!*        COUPON OPTIONS                                            *
+!********************************************************************
+
+INTEGER*1 GLOBAL              \
+                              \
+          TO.STRCOUP.TAXABLE, \    STORE COUPONS TAXABLE        (Y/N)
+          TO.STRCOUP.MULT,    \    STORE COUPONS MULTIPLIER
+          TO.MFRCOUP.TAXABLE, \    MFR COUPONS TAXABLE          (Y/N)
+          TO.MFRCOUP.MULT     !    MFR COUPONS MULTIPLIER
+
+!********************************************************************
+!*        WEIGHT OPTIONS                                            *
+!********************************************************************
+
+INTEGER*2 GLOBAL              \
+                              \
+          TO.WGTROUND,        \    WEIGHT ROUNDING
+          TO.WGT.DECPOS       !    DECIMAL PLACES FOR WEIGHTS
+
+INTEGER*4 GLOBAL              \
+                              \
+          TO.TAREWGT(1),      \    TARE WEIGHTS (0 = AUTOTARE)
+                              \    (value of -1 = entry not in use)
+          TO.WGTLIMIT,        \    WEIGHT OVERRIDE LIMIT
+          TO.KEYWGTLIM        !    KEYED WEIGHT LIMIT
+
+INTEGER*2 GLOBAL              \
+          TO.SCALE.TYPE       \    SCALE TYPE
+                              \    0 = None 1 = US 2 = UK
+                              !    3 = UK Price Computing
+
+INTEGER*1 GLOBAL              \
+\AIR43570 These new options only apply if TO.SCALE.TYPE = 1
+          TO.NO.KEYED.WGT.SCALE.ZERO, \ Prohibit keyed wgt when scale at 0
+          TO.NO.KEYED.WGT.WO.SCALE,   \ Prohibit keyed wgt when scale not avail
+\EIR43570
+          TO.VOID.WT          \    WEIGHT VARIANCE
+                              !    Y/N to void a weighted item +/- variance
+
+!********************************************************************
+!*        DISCOUNT/TAX EXEMPTION OPTIONS                            *
+!********************************************************************
+
+INTEGER*1 GLOBAL              \
+                              \
+          TO.DISCROUND        !    DISCOUNT ROUNDING
+
+INTEGER*4 GLOBAL              \
+                              \
+          TO.DISC.LIMIT,      \    MAXIMUM DISCOUNT AMOUNT
+          TO.EXEMPT.LIMIT     !    MAXIMUM TAX EXEMPTION AMOUNT
+
+!********************************************************************
+!*        DISCOUNT/TAX EXEMPTION OPTIONS                            *
+!********************************************************************
+
+INTEGER*1 GLOBAL              \
+                              \
+          TO.DISC.CODE(1),    \    DISCOUNT CODES
+          TO.DISC.EXEMPT(1)   !    TAX EXEMPTION FLAGS          (Y/N)
+
+INTEGER*2 GLOBAL              \
+                              \
+          TO.DISC.RATE(1),    \    STANDARD DISCOUNT RATE
+          TO.KEYED.RATE(1)    !    MAXIMUM KEYED DISCOUNT RATE
+
+STRING    GLOBAL              \
+                              \
+          TO.DISC.DESC$(1)    !    DISCOUNT DESCRIPTOR
+
+!********************************************************************
+!*        STORE HEADER AND TRAILER MESSAGES                         *
+!********************************************************************
+
+STRING    GLOBAL              \
+                              \
+          TO.HEADERLINE1$,    \    STORE HEADER LINE 1
+          TO.HEADERLINE2$,    \    STORE HEADER LINE 2
+          TO.TRAILERLINE1$,   \    STORE TRAILER LINE 1
+          TO.TRAILERLINE2$    !    STORE TRAILER LINE 2
+
+!********************************************************************
+!*        USER OPTION FLAGS                                         *
+!********************************************************************
+
+INTEGER*1 GLOBAL              \
+                              \
+          TO.USEROPTS(1),     \    USER DEFINED OPTION FLAGS    (Y/N)
+          TO.USEREXIT(1)      !    USER EXIT ACTIVE FLAGS       (Y/N)
+
+!********************************************************************
+!*        SUSPEND RETRIEVE OPTIONS                                  *
+!********************************************************************
+
+INTEGER*1 GLOBAL              \
+                              \
+          TO.SUSP.MGRKEY,     \ manager key required for retrieve
+          TO.SUSP.REMINDER,   \ intertransaction reminder
+          TO.SUSP.REPRINT     \ reprint receipt at retrieval
+
+INTEGER*4 GLOBAL              \
+                              \
+          TO.SUSP.MAXNUM      \ maximum number of suspends allowed
+
+
+
+
+!********************************************************************
+!*        VARIABLES USED FOR READING TERMINAL OPTIONS               *
+!********************************************************************
+
+INTEGER*1 GLOBAL              \
+                              \
+          TO.NUMTNDR,         \    NUMBER OF TENDERS DEFINED
+          TO.NUMDISC          !    NUMBER OF DISCOUNT CODES ACTIVE
+
+INTEGER*2 GLOBAL              \    DEFINE INTEGER VARIABLES
+                              \
+          TO.NULL.FIELD,      \    DUMMY FOR FIELD NOT USED
+          TO.I,TO.J,TO.K,     \    WORK VARIABLES
+          TO.L,TO.M,TO.N,     \    WORK VARIABLES
+          TO.Q,TO.R           !    WORK VARIABLES
+
+INTEGER*4 GLOBAL              \    DEFINE INTEGER VARIABLES
+                              \
+          TO.P                !    WORK VARIABLES
+
+STRING    GLOBAL              \    DEFINE STRING VARIABLES
+                              \
+          TO.OPTION$          !    STRING TO READ ENTIRE OPTIONS RECORD
+
+!********************************************************************
+!*        MODEL 3 PRINT OPTIONS                                     *
+!********************************************************************
+INTEGER*1 GLOBAL                  \
+     TO.CR.DOUBLE.STRIKE(1),      \ Array for double strike by line types on CR
+     TO.SJ.DOUBLE.STRIKE(1),      \ Array for double strike by line types on SJ
+     TO.DI.DOUBLE.STRIKE(1),      \ Array for double strike by line types on DI
+     TO.HEAD1.FONT,               \ Font for header line one
+     TO.HEAD2.FONT,               \ Font for header line two
+     TO.TRAIL1.FONT,              \ Font for trailer line one
+     TO.TRAIL2.FONT,              \ Font for trailer line two
+     TO.GUILLOTINE,               \ Flag for issuing Guillotine cut
+     TO.CR.SPACING,               \ LPI Spacing for Customer Receipt
+     TO.SJ.SPACING,               \ LPI Spacing for Sales Journal
+     TO.DI.SPACING                ! LPI Spacing for Document Insert
+
+!AIR29413 MGG
+!********************************************************************
+!*        MOD10 CHECKING                                            *
+!********************************************************************
+INTEGER*1 GLOBAL                  \
+          TO.MOD10(1)             ! flags 0 = not mod10 check, 1 = mod10 check
+
+!********************************************************************
+!*        TENDER FRANKING                                           *
+!********************************************************************
+INTEGER*1 GLOBAL                  \
+          GROUP12.CHANGED         ! flag set if Tender option where changed
+
+INTEGER*2 GLOBAL                  \
+          TS.I2.USER1,            \ user integer 1
+          TS.I2.USER2             ! user integer 2
+
+INTEGER*4 GLOBAL                  \
+          TS.I4.USER3,            \ user integer 3
+          TS.I4.USER4             ! user integer 4
+
+STRING    GLOBAL                  \
+          TS.ORG.REF$,            \ eft original ref number used on VOIDS
+          TS.SNAME$,              \ Store Name
+          TS.SADDR1$,             \ Store Address 1
+          TS.SADDR2$,             \ Store Address 2
+          TS.REF.NUMBER$,         \ eft reference number
+          TS.SIGNATURE$,          \ eft signature
+          TS.TEND.TYPE$,          \ eft tender type
+          TS.TEND.DESCRIP$,       \ eft tender description
+          TS.USER5$,              \ user string 5
+          TS.USER6$,              \ user string 6
+          TS.USER7$               ! user string 7
+
+!EIR29413 MGG

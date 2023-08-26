@@ -1,0 +1,366 @@
+\/* TIME STAMP BLOCK **********************************************
+\** END OF TIME STAMP BLOCK **************************************/
+!**********************************************************************
+!*               TRANSACTION SUMMARY LOG                              *
+!**********************************************************************
+!* The following defines the header string format for the transaction *
+!* summary log. The fields are defined in the sequence in which they  *
+!* appear in the logical record.                                      *
+!**********************************************************************
+!
+! added to patch library to be included on user exit diskette IR70880
+! CFB 10/24/86
+!
+! IO08252  Added Flexible Spending Account variables
+!          JTG IBM 18Jan2008
+!
+!
+!
+INTEGER*1 GLOBAL \
+        SL.HD.TYPE      ! STRING TYPE = 0                       INT 1
+
+INTEGER*2 GLOBAL \
+        SL.HD.TERMINAL  ! TERMINAL WHICH CREATED THIS STRING    INT 2
+
+INTEGER*2 GLOBAL \
+        SL.HD.TRANSNUM  ! TRANSACTION NUMBER                    INT 2
+
+STRING    GLOBAL \
+        SL.HD.DATETIME$ ! DATE AND TIME FOR THIS TRX            UPD 5
+
+INTEGER*1 GLOBAL \
+        SL.HD.TRANTYPE  ! TRANSACTION TYPE                      INT 1
+                        ! '00' CHECKOUT TRANSACTION
+                        ! '01' TENDER CASHING
+                        ! '02' TENDER EXCHANGE
+                        ! '03' CASHIER LOAN
+                        ! '04' CASHIER PICKUP
+                        ! '05' TENDER LISTING
+                        ! '06' PRICE VERIFY/CHANGE
+                        ! '07' TRAINING SESSION
+                        ! '08' TERMINAL TRANSFER
+                        ! '09' TERMINAL MONITOR
+                        ! '10'-'11' RESERVED
+                        ! '12' VOID PREVIOUS BY LINE ITEM  ENH01
+                        ! '13'-'15' RESERVED
+                        ! '16' VOIDED CHECKOUT TRANSACTION
+                        ! '17' OPERATOR SIGN-OFF
+                        ! '18' STANDALONE SESSION
+
+INTEGER*2 GLOBAL \
+        SL.HD.NUMSTRIN  \ NUMBER OF STRINGS IN THE LOGICAL      INT 2
+                        ! RECORD (ZERO FOR HEADER WITH NO STRINGS)
+
+STRING GLOBAL \
+        SL.HD.OPERATOR$, \ OPERATOR ID
+        SL.HD.TERMINAL$, \ TERMINAL ID
+        SL.HD.PASSWORD$  ! AND PASSWORD
+
+INTEGER*4 GLOBAL \
+        SL.HD.GROSSPOS, \ GROSS + (TRX OR SINCE S'ALONE ENTRY)  INT 4
+        SL.HD.GROSSNEG, \ GROSS - (TRX OR SINCE S'ALONE ENTRY)  INT 4
+        SL.HD.RINGTIME, \ TRANSACTION RING TIME                 INT 4
+        SL.HD.TENDERTI, \ TENDER TIME IN SECONDS                INT 4
+        SL.HD.SPECIAL,  \ SPECIAL SIGN-OFF TIME IN SECONDS      INT 4
+        SL.HD.INACTIVE, \ INACTIVE TIME IN SECONDS BEFORE THIS  INT 4
+                        \ TRANSACTION
+        SL.HD.INDICAT1  \ PACKED STRING REPRESENTATION OF       INT 4
+        \                 4 BYTE INTEGER
+        \                 BIT 0  - CANNOT BE USED
+        \   SL.RECOVER    BIT 1  - TRANSACTION WAS SAVED BY TERMINAL
+        \                          WHILE OFFLINE (TOF FEATURE)
+        \                 BIT 2-9  RESERVED
+        \   SL.GPOSNEG    BIT 10 - SET ON IF GROSSPOS < 0
+        \   SL.GNEGNEG    BIT 11 - SET ON IF GROSSNEG < 0
+        \   SL.HDMORE     BIT 12 - ADDITIONAL RECORDS EXIST FOR
+        \                          THIS TRANSACTION
+        \   SL.HDNOT1ST   BIT 13 - THIS IS NOT THE FIRST RECORD
+        \                          FOR THIS TRANSACTION
+        \   SL.HDTLX      BIT 14 - SIGN-OFF RECORD CONTAINS TILL CHANGE
+        \                          STRING DUE TO LAN FAILURE
+        \   SL.HDINIT     BIT 15 - TERMINAL INITIALISED BEFORE OR
+        \                          DURING THIS TRANSACTION
+        \                 BIT 16 - RESERVED
+        \                 BIT 17 - RESERVED
+        \   SL.HDXFER     BIT 18 - TRANSACTION TRANSFERRED
+        \   SL.HDMON      BIT 19 - TRANSACTION MONITORED
+        \   SL.HDTDRREM   BIT 20 - NO SALE TENDER REMOVAL BEFORE OR
+        \                          DURING THIS TRANSACTION
+        \   SL.HDTILCON   BIT 21 - NO SALE TILL CONTENTS REPORT BEFORE
+        \                          THIS TRANSACTION
+        \   SL.HDTILEX    BIT 22 - NO SALE TILL EXCHANGE BEFORE THIS
+        \                          TRANSACTION
+        \   SL.HDTDRVER   BIT 23 - NO SALE TENDER VERIFIED BEFORE THIS
+        \                          TRANSACTION
+        \   SL.HDNEWPW    BIT 24 - NEW PASSWORD ENTERED WITH THE
+        \                        - OPERATOR SIGN-ON
+        \   SL.HDOPSON    BIT 25 - OPERATOR SIGN-ON PRIOR TO THE
+        \                          TRANSACTION
+        \   SL.HDTDRREJ   BIT 26 - TENDER REJECTED IN THE TRANSACTION
+        \                 BIT 27 - RESERVED
+        \   SL.HDDATE     BIT 28 - DATE ENTRY MADE WITH THIS
+        \                          TRANSACTION (IN NEXT STRING)
+        \   SL.HDCDOPEN   BIT 29 - CASH DRAWER OPENED BY NO-SALE OR
+        \                          NON-SALES PROCEDURE BEFORE OR
+        \                          DURING THIS TRANSACTION
+        \   SL.HDSPSOFF   BIT 30 - SPECIAL SIGN-OFF BEFORE OR DURING
+        \                          THIS TRANSACTION
+        \   SL.HDTRMAC    BIT 31 - TERMINAL ACCOUNTABILITY
+!**********************************************************************
+!* End of transaction summary log header string definitions           *
+!**********************************************************************
+
+STRING GLOBAL \
+         SL.USERDATA$           ! USER DATA
+
+!**********************************************************************
+!* ITEM ENTRY STRING - 01
+!**********************************************************************
+!
+! The following fields are work variables for processing item strings
+!
+STRING GLOBAL \
+         SL.IT.ITEMCODE$        \ ITEM CODE (PACKED 6 BYTES)
+
+INTEGER*4 GLOBAL \
+         SL.IT.XPRICE           \ INTEGER FIELD FOR PRICE
+
+INTEGER*2 GLOBAL \
+         SL.IT.DEPARTME,        \ INTEGER FIELD FOR PRICE
+         SL.IT.FAMILYNU1,       \ COUPON FAMILY NUMBER/MISC AC NUM
+         SL.IT.FAMILYNU2,       \ COUPON FAMILY NUMBER/MISC AC NUM
+         SL.IT.INDICAT1,        \ INDICATOR 1
+         \                        BIT 0 - CANNOT BE USED
+         \   SL.ITWEIGHT              1 - WEIGHT ITEM
+         \   SL.ITENTPRI              2 - ENTERED PRICE USED
+         \   SL.ITPRIREQ              3 - PRICE REQUIRED
+         \   SL.ITLOGALL              4 - LOG ALL OCCURRENCES
+         \   SL.ITLOGEX               5 - LOG AS EXCEPTION
+         \   SL.ITFRALI               6 - ITEM CODE FROM ALIAS RECORD
+         \   SL.ITNOMVMT              7 - NO MOVEMENT KEPT
+         \   SL.ITPLANA               8 - TAX PLAN A
+         \   SL.ITPLANB               9 -     PLAN B
+         \   SL.ITPLANC              10 -     PLAN C
+         \   SL.ITPLAND              11 -     PLAN D
+         \   SL.ITFS                 12 - FOODSTAMP ITEM
+         \   SL.ITTS                 13 - TRADING STAMP ITEM
+         \   SL.ITNODISC             14 - NON DISCOUNT ITEM
+         \   SL.ITNEGPRC             15 - NEGATIVE PRICE DUE TO DEAL
+         SL.IT.INDICAT2,        \ INDICATOR 2
+         \                        BIT 0 - CANNOT BE USED
+         \   SL.ITOVRREQ              1 - REQUIRES OVERRIDE
+         \   SL.ITDATENT              2 - DATA ENTRY WITH ITEM
+         \   SL.ITMULTPR              3 - MULTIPRICED ITEM
+         \   SL.ITWTORQTY             4 - WEIGHT OR QUANTITY ENTERED
+         \   SL.ITCOUPML              5 - STORE COUPON DUE TO MULTIPLIER
+         \   SL.ITTAXKEY              6 - TAX KEY PRESSED
+         \   SL.ITFSKEY               7 - FS KEY
+         \   SL.ITCANKEY              8 - CANCEL KEY
+         \   SL.ITREFKEY              9 - REFUND KEY
+         \   SL.ITSTCPKEY            10 - STORE COUPON KEY
+         \   SL.ITMFCPKEY            11 - MANF COUPON KEY
+         \   SL.ITDEPKEY             12 - DEPOSIT KEY PRESSED
+         \   SL.ITNOMULT             13 - NO COUPON MULTIPLICATION
+         \   SL.ITIE                 14 - EXTENSION EXISTS FOR THIS ITEM
+         \                           15 - RESERVED
+\AIO08252 FSA support requires a new INDICAT4
+         SL.IT.INDICAT4          ! INDICATOR 4
+         \                         BIT 0 - CANNOT BE USED
+         \                             1 - QHP ITEM
+         \                             2 - Rx ITEM
+         \                             3 - Reserved FSA vision
+         \                             4 - Reserved FSA clinic
+         \                             5 - Reserved FSA dental
+         \                             6 - Reserved
+         \                             7 - Reserved
+         \                             8 - Reserved
+         \                             9 - Reserved
+         \                            10 - Reserved
+         \                            11 - Reserved
+         \                            12 - Reserved
+         \                            13 - Reserved
+         \                            14 - Reserved
+         \                            15 - Reserved
+\EIO08252
+
+INTEGER*1 GLOBAL \
+         SL.IT.INDICAT3,        \ INDICATOR 3 (SEE BELOW)
+         SL.IT.INDICAT3A,       \ INDICATOR 3 HIGH NIBBLE
+                                \ 0 = NORMAL SALE
+                                \ 1 = DEPOSIT
+                                \ 2 = REFUND
+                                \ 3 = DEPOSIT RETURN
+                                \ 4 = MISC TRANS RECEIPT
+                                \ 5 = MISC TRANS PAYOUT
+                                \ 6 = MANF COUPON
+                                \ 7 = STORE COUPON
+                                \ 8 = ITEM SALE CANCEL
+                                \ 9 = DEPOSIT CANCEL
+         SL.IT.INDICAT3B        \ INDICATOR 3 LOW NIBBLE
+                                \ 0 = SCANNED ITEM CODE
+                                \ 1 = KEYED ITEM CODE
+                                \ 2 = ITEM LOOKUP KEY USED
+                                \ 3 = ITEM CODE LINKED TO
+                                \ 4 = ITEM CODE WANDED
+                                \ >4 RESERVED
+
+!**********************************************************************
+!* ITEM ENTRY EXTENSION - 02
+!**********************************************************************
+!
+! The following fields are work variables
+!
+INTEGER*1 GLOBAL \
+         SL.IE.MPGROUP          ! MULTIPRICING GROUP FROM IR
+
+INTEGER*2 GLOBAL \
+         SL.IE.DEALQUAN         ! NUMBER ITEMS IN DEAL
+
+INTEGER*1 GLOBAL \
+         SL.IE.SALEQUAN,        \ PRICING QUANTITY
+\AENH01
+         SL.IE.LQD.DEALLIMIT,   \ Limited Quantity Discount deal limit quantity
+         SL.IE.LQD.REDUCEDQTY,  \ Limited Quantity Discount reduced quantity
+\EENH01
+         SL.IE.METHOD           ! PRICING METHOD
+
+INTEGER*4 GLOBAL \
+         SL.IE.SALEPRIC,        \ UNIT PRICE
+         SL.IE.SALEPRIC2,       \ ALTERNATIVE PRICE FROM IR
+         SL.IE.QTYORWGT         ! QUANTITY OR WEIGHT
+
+INTEGER*1 GLOBAL \
+         SL.IE.INDICAT1         \ INDICATOR 1
+         \                        BIT 0 - CANNOT BE USED
+         \   SL.IEWGTKEY              1 - WEIGHT KEYED
+         \   SL.IEQTYKEY              2 - QUANTITY KEYED
+         \   SL.IETARKEY              3 - TARE CODE KEYED
+         \   SL.IEWGTSCL              4 - WEIGHT FROM SCALE
+         \   SL.IEQTYREQ              5 - QUANTITY REQUIRED
+         \   SL.IEQTYREP              6 - QUANTITY FROM REPEAT ENTRY
+         \   SL.IECPENQT              7 - COUPON ENLARGED QUANTITY
+         \                           >7 - RESERVED
+
+!**********************************************************************
+!* DISCOUNT / VOID DISCOUNT - 03/04
+!**********************************************************************
+!
+! The following fields are work variables
+!
+INTEGER*1 GLOBAL \
+         SL.DI.DISGROUP ! DISCOUNT GROUP
+
+INTEGER*2 GLOBAL \
+         SL.DI.DISRATE          ! DISCOUNT RATE (0.1W - 99.9W)
+
+INTEGER*4 GLOBAL \
+         SL.DI.AMTDISCO,        \ DISCOUNT AMOUNT
+         SL.DI.AMTTAXEX         ! TAXABLE AMOUNT EXEMPTED
+
+!**********************************************************************
+!* TENDER/TENDER CORRECTION - 05/06
+!**********************************************************************
+!
+! The following fields are work variables
+!
+INTEGER*2 GLOBAL \
+         SL.TE.TENDTYPE, \ TENDER TYPE
+         SL.TE.TENDVAR   ! TENDER VARIETY
+
+INTEGER*4 GLOBAL \
+         SL.TE.AMTTENDE,        \ TENDER AMOUNT
+         SL.TE.AMTTNFEE         ! TENDER FEE AMOUNT
+
+INTEGER*1 GLOBAL \
+         SL.TE.STATUS           ! ACCOUNT STATUS CODE
+
+!**********************************************************************
+!* TAX / TAX REFUND - 07/08
+!**********************************************************************
+!
+! The tax processing will calculate the indexes for each tax type
+!
+INTEGER*4 GLOBAL \
+         SL.TX.TAXES(2)         ! TAX AMOUNT ARRAY
+
+!**********************************************************************
+!* CHANGE STRING - 09
+!**********************************************************************
+!
+! The following fields are work variables
+!
+INTEGER*4 GLOBAL \
+         SL.CH.AMTCHANGE        ! CHANGE AMOUNT
+!AIR73395
+INTEGER*2 GLOBAL \
+         SL.CH.TYPE,            \ CHANGE TENDER TYPE
+         SL.CH.VAR              ! CHANGE TENDER VARIETY
+!EIR73395
+INTEGER*2 GLOBAL \
+         SL.CH.INDICAT1         \ INDICATOR 1
+         \   SL.CHWGTKEY          BIT 1 - FOODSTAMP CHANGE
+
+!**********************************************************************
+!* MANAGERS OVERRIDE STRING - 10
+!**********************************************************************
+! No subscripts are defined since checkout support copies the
+! the information to the summary log asis
+
+STRING GLOBAL \
+         SL.OVERRIDE$        ! OVERRIDE NUMBER, PACKED
+!AIR72304 Change field to be a string
+STRING    GLOBAL \
+         SL.REASON$          ! OVERRIDE REASON
+!EIR72304
+
+!**********************************************************************
+!* DATA ENTRY STRING - 11
+!**********************************************************************
+! See terminal storage for the user data entry fields
+
+!**********************************************************************
+!* PRICE CHANGE STRING - 12
+!**********************************************************************
+! No subscripts are defined since checkout support copies the data to
+! the summary log asis
+
+STRING GLOBAL \
+         SL.PC.DATA$            ! PRICE CHANGE DATA
+
+INTEGER*1 GLOBAL \
+         SL.PC.INDICAT1         ! PRICE CHANGE INDICATOR
+
+!**********************************************************************
+!* TILL CHANGE STRING - 13
+!**********************************************************************
+
+INTEGER*4 GLOBAL \
+         SL.TC.AMTLOANS,        \
+         SL.TC.AMTPKUPS
+
+INTEGER*2 GLOBAL \
+         SL.TC.NUMLOANS,        \
+         SL.TC.NUMPKUPS
+!
+! The till change logging routine uses this array
+!
+INTEGER*4 GLOBAL \
+         SL.TC.TDR(1)           ! TENDER ARRAY
+
+!**********************************************************************
+!* TRADING STAMP STRING - 15
+!**********************************************************************
+
+INTEGER*4 GLOBAL \
+         SL.STAMPS              ! # trading stamps
+
+!**********************************************************************
+!* EXCEPTION LOG STRING - 20
+!**********************************************************************
+
+INTEGER*2 GLOBAL \
+         SL.LOGCODE             ! code to be logged
+
+STRING GLOBAL \
+         SL.LOGDATA$            ! exception log data
+

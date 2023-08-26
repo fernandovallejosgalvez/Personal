@@ -1,0 +1,126 @@
+\/* TIME STAMP BLOCK **************************************************
+\** END OF TIME STAMP BLOCK ******************************************/
+!**********************************************************************
+!* THE FOLLOWING DEFINES THE ITEM RECORD FILE. THE FIELDS ARE DEFINED *
+!* IN THE SEQUENCE IN WHICH THEY APPEAR IN THE LOGICAL RECORD.        *
+!**********************************************************************
+!
+STRING    GLOBAL               \
+          IR.ITEMCODE$,        \ ITEM CODE.                     UPD  6
+          IR.DUMMY$            ! dummy for read
+INTEGER*1 GLOBAL               \
+          IR.INDICAT0,         \ BIT 0 - QUANTITY NOT ALLOWED    INT 1
+                               \ BIT 1 - WEIGHT OR PRICE REQUIRED SINCE
+                               \         ITEM IS SOLD BY WEIGHT
+                               \ BIT 2 - QUANTITY REQUIRED
+                               \ BIT 3 - PRICE REQUIRED
+                               \ BIT 4 - ITEM SALE IS EXCEPTION LOGGED
+                               \ BIT 5 - ITEM IS NOT AUTHORIZED FOR SALE
+                               \ BIT 6 - ITEM IS NOT AUTHORIZED FOR SALE
+                               \         DURING RESTRICTED HOURS
+                               \ BIT 7 - NO ITEM MOVEMENT KEPT
+          IR.INDICAT1,         \ BIT 0 - TAX PLAN A APPLIES      INT 1
+                               \ BIT 1 - TAX PLAN B APPLIES TO ITEM
+                               \ BIT 2 - TAX PLAN C APPLIES TO ITEM
+                               \ BIT 3 - TAX PLAN D APPLIES TO ITEM
+                               \ BIT 4 - FOOD STAMP ITEM
+                               \ BIT 5 - TRADING STAMP ITEM
+                               \ BIT 6 - NON-DISCOUNTABLE ITEM
+                               \ BIT 7 - COUPON VALUE MULTIPLICATION
+                               \         NOT ALLOWED ON THIS ITEM
+          IR.INDICAT1A         \ BIT 0 - NO SHELF LABEL PRINTED  INT 1
+                               \         IN STORE
+                               \ BIT 1 - RESERVED
+                               \ BIT 2 - RESERVED
+                               \ BIT 3 - RESERVED
+                               \ BIT 4 - USER FLAG 1
+                               \ BIT 5 - USER FLAG 2
+                               \ BIT 6 - USER FLAG 3
+                               ! BIT 7 - USER FLAG 4
+STRING    GLOBAL               \
+          IR.INDICAT2$,        \ 1ST DIGIT INDICATES FOLLOWING:  UPD 1
+                               \  0 = NORMAL ITEM SALE
+                               \  1 = DEPOSIT
+                               \  2 = REFUND
+                               \  3 = DEPOSIT RETURN
+                               \  4 = MISCELLANEOUS TRANSACTION RECEIPT
+                               \  5 = MISCELLANEOUS TRANSACTION PAYOUT
+                               \  6 = MANUFACTURER'S COUPON
+                               \  7 = STORE COUPON
+                               \  8 = RESERVED
+                               \  9 = RESERVED
+                               \
+                               \ 2ND DIGIT INDICATES FOLLOWING:
+                               \  0 = UNIT PRICING OR SPLIT PACKAGE
+                               \      PRICING METHOD
+                               \  1 = BASE PLUS 1 PRICING METHOD
+                               \  2 = GROUP THRESHOLD PRICING METHOD
+                               \  3 = REDUCED DEAL PRICING METHOD
+                               \  4 = INCREASED DEAL PRICING METHOD
+                               \  5 = INDICATES PRCING DATA IS IN
+                               \      ANOTHER RECORD.  THE ITEM CODE FOR
+                               \      FOR THIS RECORD IS IN THE 6 BYTES
+                               \      STARTING AT SALEQUAN.
+                               \ >5 = RESERVED
+                               \
+          IR.DEPARTME$,        \ DEPARTMENT NUMBER               UPD 2
+          IR.FAMILYNU$,        \ COUPON FAMILY 1 OR MISC SALE    UPD 1.5
+                               \ COUPON FAMILY 2 OR MISC REFUND  UPD 1.5
+          IR.MPGROUP$,         \ MULTIPRICING GROUP NUMBER.      UPD 1
+          IR.SALEQUAN$,        \ ITEM COUNT OF ITEMS IN THE DEAL UPD 1
+          IR.SALEPRIC$,        \ PRICING METHODS 0 AND 1:        UPD 5
+                               \   DATA FORMAT = PPPPPPPPPP
+                               \   IF SALE QUANTITY = 0 OR 1
+                               \     PPPPPPPPPP = UNIT PRICE
+                               \   IF SALE QUANTITY GREATER THAN 1
+                               \     PPPPPPPPPP = PACKAGE PRICE
+                               \ PRICING METHOD 2:
+                               \   DATA FORMAT = PPPPPSSSSS
+                               \     PPPPP = PACKAGE PRICE
+                               \     SSSSS = SINGLE UNIT PRICE
+                               \ PRICING METHOD 3:
+                               \   DATA FORMAT = UUUUURRRRR
+                               \     UUUUU = UNIT PRICE
+                               \     RRRRR = REDUCED PRICE
+          IR.LINKEDTO$,        \ ITEMCODE TO BE SOLD WITH THIS  UPD 2
+                               \ ITEM  VALUE 0-9999, 0 = NO LINKED ITEM
+          IR.ITEMNAME$         ! ITEM DESCRIPTION.              ASC 18
+INTEGER*2 GLOBAL               \
+          IR.USEREXIT1,        \ RESERVED FOR USER DATA.         INT 2
+          IR.USEREXIT2         ! RESERVED FOR USER DATA.         INT 2
+
+!AENH01
+STRING    GLOBAL               \
+          IR.LQD.DEAL.LIMIT$,  \ LIMITED QUANTITY DISCOUNT DEAL LIMIT     UPD 1
+          IR.LQD.REDUCED.QTY$  ! LIMITED QUANTITY DISCOUNT REDUCED QTY    UPD 1
+!EENH01
+
+!IR29311 - Added Alternate Tax Plans and Item Tare variables
+INTEGER*1 GLOBAL               \
+          IR.ALT.TAX.PLANS     \ BIT 0 - ALTERNATE TAX PLAN A APPLIES     INT 1
+                               \ BIT 1 - ALTERNATE TAX PLAN B APPLIES TO ITEM
+                               \ BIT 2 - ALTERNATE TAX PLAN C APPLIES TO ITEM
+                               \ BIT 3 - ALTERNATE TAX PLAN D APPLIES TO ITEM
+                               \ BIT 4 - RESERVED
+                               \ BIT 5 - RESERVED
+                               \ BIT 6 - RESERVED
+                               ! BIT 7 - RESERVED
+
+INTEGER*2 GLOBAL               \
+          IR.ITEM.TARE         \ Value 0             = Item tare not used
+                               \       1     -     9 = Tare key code
+                               \          10 -  9999 = Invalid data
+                               \       1XXXX - 1XXXX = Tare weight, where XXXX =
+                               \                       0000-9999
+                               \       2XXXX - 2XXXX = Percentage Tare,
+                               \                       where XXXX = 0000-9999
+                               \       30000+        = Invalid data
+!EIR29311
+
+
+REM
+REM RECORDS ARE READ AND WRITTEN USING THE INCLUDES:
+REM
+REM     EAMIRWR1 J86      WRITE AN ITEM RECORD
+REM     EAMIRWR2 J86      WRITE AN ITEM RECORD NO AUTOUNLOCK
+REM     EAMIRRD1 J86      READ AN ITEM RECORD

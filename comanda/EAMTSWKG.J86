@@ -1,0 +1,1025 @@
+\/* TIME STAMP BLOCK ***********************************************
+\** END OF TIME STAMP BLOCK ***************************************/
+\ REM!!****************************************************************
+\ REM!!*
+\ REM!!*                  TERMINAL COMMON DATA
+\ REM!!*
+\ REM!!*  THIS MODULE DEFINES TERMINAL STORAGE. IT SHOULD BE INCLUDED
+\ REM!!*  BY ALL TERMINAL PROGRAMS.
+\ REM!!*
+\ REM!!*  IR89353   ADDED GLOBAL VARIABLES FOR MAKING THE REPRINTED LINES
+\ REM!!*            ON THE CR MORE EASY TO UNDERSTAND.  MADE GLOBAL SOME
+\ REM!!*            ON ERROR VARIABLES SO THAT THEY CAN BE READ BY
+\ REM!!*            USEREXIT 27.
+\ REM!!*            MCM IBM 03/20/90
+\ REM!!*
+\ REM!!*  IR91030   ADDED GLOBAL VARIABLE FOR USING A MODEL 3 PRINTER.
+\ REM!!*            MCM IBM 06/14/91
+\ REM!!*
+\ REM!!*  IR95357   ADDED ALIAS READ FLAG FOR USE IN PRICE CHANGE/VERIFY.
+\ REM!!*            CJN IBM 09/30/91
+\ REM!!*
+\ REM!!*  IR95574   NEEDED TO KEEP TRACK OF ELECTRONIC COUPONS (COUPON
+\ REM!!*            THAT LINKED TO AN ITEM) VS. PAPER COUPONS SO
+\ REM!!*            SUSPEND/RETRIEVE CAN POST A WARNING MESSAGE TO
+\ REM!!*            "RETURN PARTIAL TENDER/COUPONS" BEFORE A SUSPEND
+\ REM!!*            TNM IBM 10/21/91
+\ REM!!*
+\ REM!!*  IR95928   PE: IR89353 FAILED TO MARK ERROR VARIABLES AS GLOBAL
+\ REM!!*            THUS CAUSING LOCAL COPIES OF THE THREE TO EXIST IN
+\ REM!!*            ALL MODULES (THEREFORE TAKING UP DATA SPACE).
+\ REM!!*            MCM IBM 11/04/91
+\ REM!!*
+\ REM!!*  IO00464   Add variable name for Serial Port baudrate.
+\ REM!!*            Currently the value for opening the Serial port is
+\ REM!!*            hard coded to 1200.
+\ REM!!*            Added to support WIC EBT.
+\ REM!!*            LTG IBM 05/18/04
+\ REM!!*
+\ REM!!*  IO08970   Add a global for specifying NVRAM buffer size.
+\ REM!!*            CJN IBM 06/06/2008
+\ REM!!*
+
+\ REM!!****************************************************************
+
+\ REM!!****************************************************************
+\ REM!!*  TERMINAL ID
+\ REM!!****************************************************************
+
+STRING GLOBAL           \
+        TS.STORE$,      \ STORE ID IN ASCII
+        TS.TERMINAL$,   \ TERMINAL ID IN ASCII
+        TS.TERMINALP$   ! TERMINAL ID IN PACKED DECIMAL
+
+\ REM!!****************************************************************
+\ REM!!*
+\ REM!!*  OPERATOR INFORMATION
+\ REM!!*
+\ REM!!*    THIS AREA IS MAINTAINED BY SIGNON PROCESSING. IT CONTAINS
+\ REM!!*    ALL REQUIRED OPERATOR AUTHORIZATION INFORMATION
+\ REM!!*
+\ REM!!****************************************************************
+
+STRING GLOBAL           \
+        TS.OPER$,       \ OPERATOR NUMBER (PACKED 5)
+        TS.PSWD$             ! PASSWORD (PACKED 4)
+
+INTEGER*2  GLOBAL   \
+    TS.OPER.IND0,   \   OPERATOR AUTHORIZATION
+    TS.OPER.IND1,   \   OPERATOR AUTHORIZATION
+    TS.DFLT.IND0,   \   DEFAULT OPERATOR AUTHORIZATION
+    TS.DFLT.IND1    !   DEFAULT OPERATOR AUTHORIZATION
+
+\ REM!!****************************************************************
+\ REM!!*  I/O PROCESSOR VARIABLES
+\ REM!!****************************************************************
+
+STRING  GLOBAL               \
+        TS.IODATA$,          \ I/O PROCESSOR READ LINE VARIABLE
+        TS.IO.HDR$,          \ I/O PROCESSOR HEADER STRING
+        TS.IO.DATA$(1),      \ DATA READ FROM I/O PROCESSOR
+        TS.IO.PREV.DATA$(1)  ! PREV DATA READ FROM I/O PROCESSOR
+
+INTEGER*2 GLOBAL             \
+        TS.IO.KEYS(1),       \ INTEGER VALUE OF FIRST BYTE OF DATA$
+        TS.IO.PREV.KEYS(1),  \ INTEGER VALUE OF FIRST BYTE OF DATA$
+        TS.IO.STATE,         \ CURRENT STATE OF IO PROCESSOR
+        TS.IO.NEXTSTATE,     \ NEXT STATE REQD - SET BY INDIVIDUAL APPL
+        TS.IO.MOTORKEY,      \ LAST MOTOR KEY USED
+        TS.IO.PREV.MOTORKEY, \ PREV MOTOR KEY USED
+        TS.IO.DEVICE,        \ ORIGINATING DEVICE
+                             \ 1=KEYBOARD  2=OCR WAND  3=SCANNER
+        TS.IO.INPUT.READY,   \ FLAG IF DATA IS READY IN ARRAY FROM APPL
+        TS.TRANS.LOG.WRITE,  \ FLAG IF USER EXIT 18 IS CALLED     !IR73623
+                             \ BEFORE WRITING TRANSACTION DATA TO LOG
+        TS.ENTRY.KEY,        \ KEY VALUE DESIRED ON DATA ENTRY
+        TS.ENTRY.POS,        \ ENTRY POSITION FOR DATA ENTRY
+        TS.REMOVE.KEY,       \ FLAG FOR REMOVAL OF MANAGERS KEYLOCK
+        TS.OVR.KEY,          \ OVR KEY PRESSED               !AIR73916
+        TS.IO.COUNT          ! COUNT OF INPUT TIMES ON SAME ENTRY
+
+\ REM!!****************************************************************
+\ REM!!*  TERMINAL INPUT/OUTPUT DATA
+\ REM!!****************************************************************
+
+STRING GLOBAL           \
+    TS.DISPTYPE$,       \ VGA = "1", FEATURE A = "0"      IR29592
+    TS.MSRSEP$,         \ MSR SEPARATOR X'0D' IR72044
+    TS.DOLLARSEP$,      \ DOLLAR SEPARATOR CHARACTER
+    TS.CENTSEP$,        \ CENT       "         "
+    TS.TIMESEP$,        \ TIME       "         "
+    TS.DATESEP$         ! DATE       "         "
+
+INTEGER*2 GLOBAL        \
+    TS.DATEFORM         ! INDICATION WHICH FORMAT DATE IS TO TAKE
+
+INTEGER*2  GLOBAL       \
+    TS.PRNTOPTS(1),     \ PRINT OPTIONS CALCED FROM REAL OPTIONS
+    TS.PRNTOPT2(1)      \ PRINT OPTIONS FOR OVERRIDEABLE ERRORS
+
+INTEGER*2  GLOBAL       \
+    TS.LINETYPE,        \ LINETYPE FOR PRINT/DISPLAY ROUTINES
+    TS.LINEDATA,        \ ERROR MESSAGE NUMBER (OR OTHER DATA)
+    TS.LINEDATA2,       \ OTHER DATA
+    TS.LINEDATA3,       \ AND EVEN MORE OTHER DATA
+    TS.PRT.OPT,         \ PRINT OPTIONS
+    TS.PRT.SJDI,        \ PRINT SJ VERSION ON DI, NOT CR VERSION
+    TS.SAVPRT.OPT,      \ PRINT OPTIONS SAVE AREA
+    TS.PRT.PARM,        \ PRINT OPTIONS PARAMETERS PASSED
+    TS.DS.NOSAVE,       \ DO NOT SAVE THIS DISPLAY IN SAVDISP$
+    TS.TFLAG1,          \ TEST FLAG FOR PRINT
+    TS.TFLAG2,          \ TEST FLAG FOR PRINT
+    TS.TR.TRANNUM,      \ TRAINING TRAN NO FOR PRINT ?????????
+    TS.XXMOD,           \ XX MODIFIER FOR PRINT
+    TS.YYMOD,           \ YY MODIFIER FOR PRINT
+    TS.MMMOD,           \ MM MODIFIER FOR PRINT
+    TS.ZMOD,            \ Z MODIFIER FOR PRINT
+    TS.PRINTPRM         ! PRINT PARAMETERS (USED IN TSHIC)
+
+!AIR71367 timer processing
+!NTEGER*2  GLOBAL       \
+!   TS.EOT.COUNT,       \ TIMEOUT FOR EOT THANKYOU MESSAGE
+!   TS.CD.COUNT         ! TIMEOUT FOR CASH DRAWER OPEN
+INTEGER*2  GLOBAL       \
+    TS.DRAWER.TIMER.JUST.STARTED
+INTEGER*4  GLOBAL       \
+    TS.TIMER.EOT,       \ TIMEOUT FOR EOT THANKYOU MESSAGE
+    TS.TR.TTAF,         \ TRAINING TTAF FOR  PRINT  ?????????!AIR78450
+    TS.TIMER.DRAWER     ! TIMEOUT FOR CASH DRAWER OPEN
+!EIR71367
+
+INTEGER*4  GLOBAL       \ IR76550 ADDED FOR TOF
+    TS.RINGTIME,        \ RINGTIME FOR A TRANSACTION
+    TS.TENDERTI,        \ TENDERTIME
+    TS.SPECIAL,         \ SPECIAL TIME
+    TS.INACTIVE         ! INACTIVE TIME
+
+INTEGER*2  GLOBAL       \
+    TS.DEV.FLAG,        \ FLAG SHOWS A)CD OPEN B)DOC INSERTED
+    TS.STACKDISP,       \ DISPLAY ROUTINE TO STACK DISPLAY BUFFERS
+    TS.DS.REQUIRED,     \ MAINLINE TO CALL FOR DISPLAY
+    TS.PROCEDURE,       \ NONSALES PROCEDURE ID
+    TS.CKRTIME,         \ CHECKER TIME
+    TS.SIGNED.ON,       \ TERMINAL HAS OP / PASSWORD
+    TS.SPEC.SIGN.OFF,   \ SPECIAL SIGN OFF
+    TS.AUTO.SIGN.OFF,   \ AUTO SIGN OFF TIME
+    TS.AUTO.POWER.OFF,  \ AUTO POWER OFF TIME
+    TS.MUST.SIGN.OFF,   \ APPLICATION REQUESTED AUTO SIGN OFF AT END TX
+    TS.AUTO.BAL,        \ AUTO BALANCE DUE COUNTER
+    TS.INTRX,           \ WITHIN A SALES TRX
+    TS.NSOK,            \ NOSALES OK FLAG
+    TS.REPEAT.COUNT,    \ NUMBER OF REPEATED ENTRIES
+    TS.ENTRY.REPEATABLE, \ THIS ENTRY CAN BE REPEATED
+    TS.OPTIONS          ! VOID VALIDATION OPTIONS
+
+!AIR80239  -  DUAL DISPLAY GLOBAL VARIABLES
+STRING GLOBAL           \
+    SYS.NAME$,          \ NAME OF SYSTEM DISPLAY (EX. ANDISPLAY)
+    SEC.NAME$           ! NAME OF SECONDARY DISPLAY (EX. ANDISPLAY2)
+
+INTEGER*2 GLOBAL        \
+    TS.ALPHA2,          \ INDICATOR OF A SECOND ALPHANUMERIC DISPLAY
+    TS.ALPHA2.NO.OPER,  \ FLAG FOR SECOND ALPHANUMERIC NOT AN OPERATOR
+    TS.SHOPPER,         \ INDICATOR OF A SHOPPER DISPLAY AS 2ND DISPLAY
+    TS.VDU,             \ INDICATOR OF A VIDEO DISPLAY AS 2ND DISPLAY
+    LED.REQD            ! WHICH L.E.D.S ON SHOPPER DISPLAY TO LIGHT
+!EIR80239
+
+STRING     GLOBAL       \
+    TS.SDESC$(1),       \ ARRAY OF TERMINAL DESCRIPTORS
+    TS.DISP1$,          \ DISPLAY BUFFER    - LINE 1
+    TS.DISP2$,          \                     LINE 2
+    TS2.DISP1$,         \ DISPLAY 2 BUFFER    - LINE 1  -  IR80239
+    TS2.DISP2$,         \                       LINE 2  -  IR80239
+    TS.SAVDISP1$,       \ DISPLAY SAVE AREA - LINE 1
+    TS.SAVDISP2$,       \                     LINE 2
+    TS.PRTBUF$,         \ PRINT BUFFER
+    TS.FORMCR$,         \ CASH RECEIPT PRINT FORMAT (TSHIC)
+    TS.SAVPRT$,         \ PRINT BUFFER SAVE AREA
+    TS.FROM.OPER$,      \ OPER NUM FOR PRINT      ?????????
+    TS.TO.OPER$         ! OPER NUM FOR PRINT      ?????????
+
+INTEGER*4  GLOBAL       \
+    TS.DEV.LONG,        \ RESULT OF GETLONG FOR DEVICES
+    TS.LIMAMT,          \ OVERRIDE LIMIT AMOUNT FOR DISPLAY  ?????
+    TS.TTAF             ! TTAF FOR PRINT     ????????
+
+INTEGER*2  GLOBAL       \
+    TS.GUIDANCE,        \ OVERRIDE REQ AND GUIDANCE # REQUESTED
+    TS.MO.REASON,       \ REASON CODE FOR OVERRIDES
+    TS.ERR.STAT,        \ OVERRIDE STATUS OF ERRORS SO FAR
+    TS.PURGE.ERR,       \ PURGE ERRORS SO FAR IN TSCSEC03
+    TS.REV.LIM,         \ REVERSE LIMIT SENSE; AMT MUST BE < LIM
+                        \     SET BY APPLICATION, RESET BY TSCSEC03
+    TS.NO.LIM,          \ NO LIMIT CHECKING TO BE DONE IN CS
+                        \     SET WITHIN CSEC03
+    TS.HARD.ERR,        \ HARD ERROR HAS OCCURRED SINCE ERROR PROC'ING
+                        \     SET BY TSCSEC03, RESET BY TSCSEC13
+    TS.ERRPTR,          \ POINTER TO ERROR ARRAY (SEE BELOW)
+    TS.ERRMSGNO         ! ERROR MESSAGE NUMBER TO BE ADDED TO ARRAY
+
+INTEGER*4  GLOBAL       \
+    TS.ERRLIST(2),      \ ERROR STACK; ERROR CODES CORRESPONDING
+                        \   TO ERRORS STACKED SO FAR. THIS ARRAY IS
+                        \   MAINTAINED BY TSCSEC03, TSCSEC13 AND
+                        \   MAINLINE ONLY: ADDING AN ERROR IS ACHIEVED
+                        \   BY SETTING ELEMENTS IN STACKERR (BELOW).
+                        \   EACH ELT OF ERRLIST(I, J) HAS THE FOLLOWING
+                        \   FORMAT;
+                        \     I - 1 TO 10; POSITION ON ERROR STACK
+                        \     J - 0 TO 8; WITH THE FOLLOWING MEANINGS
+                        \       0 - ERROR TYPE
+                        \             1 - MGR OVR REQD
+                        \             2 - OP OVR REQD
+                        \             3 - EITHER OVR REQD
+                        \    DEFAULT: 4 - CLEAR REQD
+                        \             5 - AC# ENTRY/(OVR) REQD
+                        \             6 - PIN# PROCESSING REQD
+                        \             7 - REPEAT LAST FUNCTION KEY
+                        \             8 - INSERT DOC/MGR OVERRIDE
+                        \             9 - PRICE REQD/CLEAR
+                        \            10 - QTY OR FEE REQD/CLEAR
+                        \            11 - WT REQD/(SCALES)/CLEAR
+                        \            12 - ENTER/CLEAR (AC# PR'ING)
+                        \       1 - LIMIT ASSOCIATED WITH ERROR
+                        \       2 - AMOUNT ASSOCIATED WITH LIMIT
+                        \       3 - DESC. ID FOR EXTENDED OVR DISPLAYS
+                        \       4 - AMT FORMAT INFORMATION
+                        \       5 - XX MODIFIER
+                        \       6 - YY MODIFIER
+                        \       7 - RESERVED
+                        \       8 - RESERVED
+                        \
+    TS.STACKERR(1)      \ SET THESE VBLS BEFORE CSEC03 CALL WHICH SETS
+                        !   ABOVE ARRAY CORRECTLY.
+
+STRING     GLOBAL       \
+    TS.B040$,           \ FILE ACCESS FAILED - READ INTO STORAGE
+    TS.ERRDISP$         \ STACK OF 40-BYTE ERROR DISPLAYS ASSOCIATED
+                        !   WITH ERROR STACK ABOVE.
+
+\ REM!!****************************************************************
+\ REM!!*
+\ REM!!*  TRANSACTION TOTALS
+\ REM!!*
+\ REM!!*    ARRAY STRUCTURES:
+\ REM!!*
+\ REM!!*    TOTALS: TRANSACTION TOTALS
+\ REM!!*
+\ REM!!*    INDEX 1; 0 = OVERALL TOTAL
+\ REM!!*             1 = PLAN A TAXABLE AMT TOTAL
+\ REM!!*             2 = PLAN B TAXABLE AMT TOTAL
+\ REM!!*             3 = PLAN C TAXABLE AMT TOTAL
+\ REM!!*             4 = PLAN D TAXABLE AMT TOTAL
+\ REM!!*
+\ REM!!*    INDEX 2; 0 = REGULAR TOTALS
+\ REM!!*             1 = FOOD STAMPABLE TOTALS
+\ REM!!*
+\ REM!!*    INDEX 3; 0 = REGULAR TOTALS
+\ REM!!*             1 = DISCOUNTABLE TOTALS
+\ REM!!*
+\ REM!!
+\ REM!!*    TENDERED: TOTALS FOR THIS TRANSACTION
+\ REM!!*
+\ REM!!*    INDEX 1; 0 = TOTAL TENDERED SO FAR
+\ REM!!*             1 = CASH TENDERED
+\ REM!!*             2 = CHECKS TENDERED
+\ REM!!*             3 = FOOD STAMPS TENDERED
+\ REM!!*             4,5,6 = MISC TOTALS 1,2,3 TENDERED
+\ REM!!*
+\ REM!!****************************************************************
+
+INTEGER*4  GLOBAL       \
+    TS.TOTALS(3)        !   ARRAY OF REGULAR/F.S. TAX TOTALS
+
+INTEGER*4  GLOBAL       \
+    TS.TENDERED(1),     \   TENDER AMOUNTS BY TENDER TYPE
+    TS.TENDVAMT(1)      !   TENDER AMOUNTS BY TENDER VARIETY
+
+INTEGER*2  GLOBAL       \
+    TS.NUMTNDRS(1)      !   ARRAY OF #OF TENDERS THIS TRX
+
+INTEGER*4  GLOBAL       \
+    TS.GROSSPOS,        \ GROSS + FOR THIS TRX
+    TS.GROSSNEG,        \ GROSS - FOR THIS TRX
+    TS.MISCTRX.AMT      ! MISC TRX AMOUNT FOR THIS TRX
+
+\ REM!!****************************************************************
+\ REM!!*
+\ REM!!*  TOTALS CALCULATED AT BALANCE DUE/DISC PROCESSING
+\ REM!!*
+\ REM!!*    ARRAY STRUCTURES:
+\ REM!!*
+\ REM!!*    BALDUE:    REGULAR AND F/S BALANCE DUE
+\ REM!!*
+\ REM!!*    SV.BALDUE: SAVED BALANCE DUES
+\ REM!!*
+\ REM!!*    INDEX 1; 0 = REGULAR BALANCE DUE
+\ REM!!*             1 = F/S BALANCE DUE
+\ REM!!*
+\ REM!!*    TAXES: AMOUNTS OF TAX DUE
+\ REM!!*    INDEX 1; 0 = TOTAL/FOODSTAMP TAX DUE
+\ REM!!*             1 = PLAN A TAX DUE
+\ REM!!*             2 = PLAN B TAX DUE
+\ REM!!*             3 = PLAN C TAX DUE
+\ REM!!*             4 = PLAN D TAX DUE
+\ REM!!*
+\ REM!!*    INDEX 2; 0 = REGULAR TOTALS
+\ REM!!*             1 = F/S TOTALS
+\ REM!!*
+\ REM!!*
+\ REM!!*    DISC.SAVE: ARRAY TO SAVE DISCOUNT TOTALS
+\ REM!!*
+\ REM!!*    INDEX 1; 0 = TOTAL/FOODSTAMP AMT
+\ REM!!*             1 = PLAN A AMT
+\ REM!!*             2 = PLAN B AMT
+\ REM!!*             3 = PLAN C AMT
+\ REM!!*             4 = PLAN D AMT
+\ REM!!*
+\ REM!!*    INDEX 2; 0 = REGULAR TOTALS
+\ REM!!*             1 = F/S TOTALS
+\ REM!!*
+\ REM!!*
+\ REM!!*    TAXX.SAVE: ARRAY TO ACCUMULATE TAX EX. TAXABLE AMTS
+\ REM!!*
+\ REM!!*    INDEX 1; (0 = NOT USED)
+\ REM!!*             1 = PLAN A AMT
+\ REM!!*             2 = PLAN B AMT
+\ REM!!*             3 = PLAN C AMT
+\ REM!!*             4 = PLAN D AMT
+\ REM!!*
+\ REM!!*    INDEX 2; 0 = REGULAR TOTALS
+\ REM!!*             1 = F/S TOTALS
+\ REM!!*
+\ REM!!*    INDEX 3; 0 = REGULAR TOTALS
+\ REM!!*             1 = DISCOUNTABLE TOTALS
+\ REM!!*
+\ REM!!****************************************************************
+
+INTEGER*2  GLOBAL       \ BALANCE DUE INPUT PARAMETERS
+    TS.BD.FSPARM,       \ FLAG: Y = F/S BD, N = REG BD REQD (DEFAULT)
+    TS.BD.DSPPARM       ! FLAG: Y = DISPLAY REQD, N = DISP NOT REQD
+
+INTEGER*4  GLOBAL       \
+    TS.TAXES(2),        \ TOTAL TAXES; GRAND TOTAL + 4 PLAN TOTALS
+    TS.TAX.SAVE,        \ LAST AMOUNT OF TAX PRINTED; SET AT TAX PRINT
+                        \
+    TS.DISC.SAVE(2),    \ AMOUNTS DISCOUNTED
+    TS.TAXX.SAVE(3),    \ TAX EXEMPTIONS SO FAR THIS TRX
+    TS.BALDUE(1),       \ BALANCE DUE AMOUNT, REGULAR AND F/S
+    TS.PR.BALDUE        ! LAST PRINTED REG. BALANCE DUE
+
+INTEGER*2  GLOBAL       \
+    TS.DISC.GP.SV,      \ SAVED DISCOUNT GROUP
+    TS.DISC.RT.SV,      \ SAVED DISCOUNT RATE
+    TS.DISC.INDEX       ! DISCOUNT GROUP INDEX
+
+INTEGER*2  GLOBAL       \ ** FLAGS **
+    TS.DSCRT.ENTERED,   \ FLAG SHOWING RATE ENTERED
+    TS.DISC.REQD,       \ DISCOUNT REQUIRED
+    TS.TAXX.REQD,       \ TAX EXEMPTION REQUIRED
+    TS.BD.FSDUE,        \ F/S BD (IF PARM SET OR KEYED FROM MAINLINE)
+    TS.BD.DISP          ! BD DISPLAY REQUIRED (IF PARM SET OR KEYED)
+
+\ REM!!****************************************************************
+\ REM!!*  VARIABLES USED BY TENDERING AND EOT
+\ REM!!****************************************************************
+
+! **** FLAGS ****
+
+INTEGER*2  GLOBAL       \
+    TS.FRANK.OVR,       \ FRANKING OVERRIDDEN IN ASYNC ROUTINE
+    TS.FRANK.TOUT,      \ FRANKING TIMEOUT SET UP BEFORE DI PRINT
+    TS.ACNUM.REQD,      \ ACCOUNT NUMBER ENTRY REQUIRED BY TSCSEC01
+    TS.EXT.REQD,        \ EXT VERIFICATION RE-ENTRY REQD BY TSCSEC01
+    TS.CDTDR.INTRX,     \ CD BASED TENDER TAKEN IN CHECKOUT TRANSACTION
+    TS.MAN.REQD,        \ MANUAL TENDER REQUIRED FLAG
+    TS.MAN.REENTRY,     \ NEXT TENDER KEY MANUAL TENDER REENTRY
+    TS.DEL.OVR.REQD,    \ DELAYED MANAGERS OVERRIDE REQUIRED
+    TS.CDOPEN.PEND,     \ CD OPEN IS PENDING
+    TS.TENDLIM.EX       ! TENDER LIMIT EXCEEDED
+
+STRING     GLOBAL       \
+    TS.ACNUM$,          \ ENTERED ACCOUNT NUMBER
+    TS.PIN$,            \ ENTERED PIN NUMBER
+    TS.EXPIRY$          ! ENTERED ACCOUNT EXPIRY DATE
+
+! **** EXTERNAL TENDER TRX RECORD ****
+
+STRING     GLOBAL       \
+    TS.VOID.KEY$(1),    \ tender id + account number
+    TS.VOID.MSG$(1)     !
+INTEGER*4  GLOBAL       \
+    TS.VOID.AMT(1)      ! amount tendered against this account
+
+! **** AMOUNTS ****
+
+INTEGER*2  GLOBAL       \
+    TS.TDR.REMO,        \ FLAG TO SHOW TENDER REMOVAL
+    TS.TDR.INDEX,       \ INDEX CALCD FROM TENDER TYPE/VARIETY
+    TS.CHG.TYPE,        \ TENDER TYPE FOR CHANGE DUE              !AIR73395
+    TS.TDR.PREV,        \ PREVIOUS NON F.S. TENDER ENTERED (0 = NONE)
+    TS.VAR.PREV         ! PREVIOUS NON F.S. VARIETY ENTERED       !AIR70468
+
+INTEGER*1  GLOBAL       \
+    TS.TENDIX(2)        ! INDEX INTO TENDER OPTIONS
+
+\ REM!!****************************************************************
+\ REM!!*  TRANSACTION CONTROL FLAGS
+\ REM!!****************************************************************
+
+INTEGER*2  GLOBAL       \
+    TS.CDLIM1.EXCEEDED, \   CD LIMIT 1 EXCEEDED; DISPLAY WARNING
+    TS.CDLIM2.EXCEEDED, \   CD LIMIT 2 EXCEEDED; SALES INHIBITED
+                        \     SET BY EOT, RESET BY PICKUP
+    TS.MAN.WT,          \   MANUAL WT ENTERED
+    TS.TRAINING,        \   OPERATOR IS IN TRAINING MODE
+                        \     SET BY T-MODE SON, RESET BY T-MODE SOFF
+    TS.STANDALONE,      \   TERMINAL IS IN STANDALONE
+                        \     FLAG MAINTAINED BY MAINLINE
+    TS.SUPPRESS.SLONE,  \   DO NOT ENTER STANDALONE
+                        \     USED TO PREVENT SLONE IF EXCEPTION LOG ERR
+    TS.DISCFLAG,        \   DISCOUNT ENTERED THIS TRANSACTION
+                        \     SET BY DISCOUNT; RESET BY VD DISC OR EOT
+    TS.TAXXFLAG,        \   TAX EXMP ENTERED THIS TRANSACTION
+                        \     SET BY TAX EX; RESET BY VD TAX EX OR EOT
+    TS.TRX.STATUS,      \   TRANSACTION STATUS BYTE (NOT A FLAG)
+                        \     MEANS:
+                        \     0 - IN ITEM SALES
+                        \     1 - BAL DUE TAKEN
+                        \     2 - TENDERING WAS LAST FN
+                        \     3 - DISCOUNT WAS LAST FUNCTION
+                        \     4 - COUPON HAS BEEN TENDERED
+                        \     5 - UPC 5 COUPON HAS BEEN TENDERED  !IR72591
+                        \    -1 - F/S BALANCE DUE
+                        \    -2 - F/S TENDER WAS LAST FN
+                        \   100 - VOID EOT IN PROGRESS
+                        \
+    TS.BAL.TAKEN,       \   BALANCE DUE TAKEN THIS TRANSACTION    !IR72939
+    TS.FS.TENDERED,     \   FS TENDERED IN THIS TRX
+    TS.FS.INPROG,       \   FS SUMMARY KEYBOARD IN PROCESS
+    TS.FSBAL.PRINTED,   \   F.S. BAL DUE  PRINTED
+                        \     MAINTAINED BY TENDERING
+    TS.NS.VOID,         \   NON SALES TN VOIDED
+    TS.PENDCOUNT,       \   COUNT OF ENTRIES PENDING OVERRIDE
+    TS.PENDERROR,       \   inhibit log of ovr s.l. string        !AIR72303
+    TS.FIRSTPE,         \   INDEX TO FIRST PENDING OVERRIDE STRING
+    TS.INHIBIT          !   SALES AND COUPONS INHIBITED (TRX FULL)
+
+ STRING GLOBAL          \ OPERATOR PERFORMANCE TIME STRING
+    TS.TIME$
+
+\ REM!!****************************************************************
+\ REM!!*  TRANSACTION MISCELLANEOUS DATA
+\ REM!!****************************************************************
+
+INTEGER*1 GLOBAL        \
+    TS.PARTIAL.TENDER,  \ IR95574  - INDICATES PARTIAL TENDERS
+    TS.PARTIAL.COUPONS, \ IR95574  - INDICATES PARTIAL COUPONS
+    TS.ITEM.LINK,       \ FLAG TO INDICATE AN ITEM HAS A LINKED ITEM
+                        \   TO CHECK FOR ELECTRONIC COUPONS ->IR95574
+    TS.DEPGRP(1)        ! DEPARTMENT-GROUP CROSS REF SET UP BY INITLSTN
+
+INTEGER*2 GLOBAL        \
+    TS.NOTONE           ! NO TONE SOUNDED FOR INDICATED MESSAGE
+
+INTEGER*4  GLOBAL       \
+    TS.XPRICE,          \ REAL ITEM PRICE (IE CORRECT SIGN)
+                        \
+    TS.STAMPABLE(1),    \ TRADING STAMPABLE AMOUNT
+                        \
+    TS.ELEC.COUP,       \ COUNT OF ELECTRONIC COUPONS->IR95574
+                        \   ACCUMULATED BY COUPON ENTRY, RESET BY EOT
+    TS.COUP.AMT,        \ COUPON AMOUNT FOR THIS TRANSACTION
+    TS.COUP.QTY         \ NUMBER OF COUPONS FOR THIS TRANSACTION
+                        !   ACCUMULATED BY COUPON ENTRY, RESET BY EOT
+
+\ REM!!****************************************************************
+\ REM!!*  ITEM/TRANSACTION NEGATIVE ENTRY LIMITS
+\ REM!!****************************************************************
+
+INTEGER*4  GLOBAL       \
+    TS.DELAMT(1)        ! DELAYED OVERRIDE AMOUNTS
+
+INTEGER*2  GLOBAL       \
+    TS.DELCNT(1),       \ DELAYED OVERRIDE COUNTS
+    TS.DELITEM          ! PENDING ITEM OVERRIDE COUNT
+
+\ REM!!****************************************************************
+\ REM!!*  VARIABLES USED BY NO-SALES PROCEDURES **** TEMP
+\ REM!!****************************************************************
+
+! **** FLAGS ****
+
+INTEGER*2  GLOBAL       \
+    TS.AUTO.EX          ! AUTO TILL EXCHANGE REQUIRED
+
+! **** AMOUNTS ****
+
+INTEGER*4  GLOBAL       \
+    TS.TILL.TOTAL       ! TILL CONTENTS TOTAL
+
+\ REM!!****************************************************************
+\ REM!!*  VARIABLES USED BY CASHIER PICKUP/LOAN/TENDER COUNT
+\ REM!!****************************************************************
+
+! **** AMOUNTS ****
+
+INTEGER*4  GLOBAL       \
+    TS.PLC.TOTAL,       \ LOCAL PICKUP/LOAN GRAND TOTAL
+    TS.PLC.TDR(1)       ! LOCAL PICKUP/LOAN TENDER TOTAL
+
+INTEGER*2  GLOBAL       \
+    TS.PICKLOAN,        \ PICKUP/LOAN LITERAL INDICATOR
+    TS.PLC.QTY,         \ PICKUP/LOAN QTY ENTERED
+    TS.PLC.NUM          ! LOCAL PICKUP/LOAN COUNT
+
+\ REM!!****************************************************************
+\ REM!!*  VARIABLES USED BY TERMINAL MONITOR
+\ REM!!****************************************************************
+
+INTEGER*2  GLOBAL       \
+    TS.TR.STATUS        ! COPY OF TE.TR.STATUS      IR73429
+
+INTEGER*2  GLOBAL       \
+    TS.PRT.HALT,        \ PRINT HALTED   )  ALSO USED BY TENDER
+    TS.PRT.AB,          \ PRINT ABORTED  )  LISTING
+    TS.TM.OPEN,         \ TERMINAL MONITOR FILE OPEN
+    TS.TM.MON           ! SOME MONITORING HAS OCCURRED
+
+INTEGER*2  GLOBAL       \
+    TS.TM.STATUS        ! TERMINAL STATUS FIELD
+
+INTEGER*4  GLOBAL       \
+    TS.TM.REC,          \ RECORD NUMBER TO READ
+    TS.TM.SEQ,          \ SEQUENCE NUMBER EXPECTED
+    TS.TM.RSEQ          ! SEQUENCE NUMBER READ
+
+STRING     GLOBAL       \
+    TS.TM.TERM$,        \ TERMINAL TO MONITOR
+    TS.TM.TYPE$,        \ PRINT OR DISPLAY
+    TS.TM.LINE$         ! LINE TO PRINT/DISPLAY
+
+\ REM!!****************************************************************
+\ REM!!*  VARIABLES USED BY TENDER LISTING
+\ REM!!****************************************************************
+
+! **** STRINGS ****
+
+STRING     GLOBAL       \ FROM TENDER LISTING FILE
+    TS.TL.DATE$,        \ DATE/TIME OF BATCH
+    TS.TL.CUST$,        \ CUSTOMER NO
+    TS.TL.FEE$,         \ FEE AMOUNT                      RM 6/10/86
+    TS.TL.TYPE$,        \ RECORD TYPE                     RM 6/10/86
+    TS.TL.TERM$,        \ TERMINAL NO                     RM 6/10/86
+    TS.TL.TDR.TYPE$,    \ TENDER TYPE                     RM 6/10/86
+    TS.TL.OPER$,        \ OPERATOR NO                     RM 6/10/86
+    TS.TL.USER$,        \ USER FIELD                      RM 6/10/86
+    TS.TL.TDR$          ! TENDER AMOUNT                   RM 6/10/86
+
+! **** AMOUNTS ****
+
+INTEGER*4  GLOBAL       \
+    TS.TL.TDR,          \ TDR AMOUNT
+    TS.TL.SUBTOT,       \ TENDER VARIETY SUBTOTAL
+    TS.TL.TOTAL         ! TENDER TYPE TOTAL
+
+INTEGER*2  GLOBAL       \
+    TS.TL.LINENO,       \ LINE NUMBER
+    TS.TL.VARNO,        \ VARIETY
+    TS.TL.MTO           ! MULTIPLE TENDERS OPTION FLAG
+
+\ REM!!****************************************************************
+\ REM!!*  VARIABLES USED BY PRICE VERIFY/CHANGE
+\ REM!!****************************************************************
+
+! **** STRINGS ****
+
+STRING     GLOBAL       \
+    TS.PC.ITEM$,           \ ENTERED ITEM CODE   - ASCII
+    TS.PC.ITEMO$,          \ ORIGINAL ITEM CODE  - ASCII
+    TS.PC.QTY$,            \ CURRENT QUANTITY    - ASCII
+    TS.PC.OQTY$,           \ ORIGINAL QUANTITY   - ASCII
+    TS.PC.BATCHNO$,        \ BATCH IDENTIFIER    - ASCII (8)
+    TS.PC.FLD$(2)          ! FIELD VALUES ARRAY
+
+! **** AMOUNTS ****
+
+INTEGER*4  GLOBAL       \
+    TS.PC.PRICE1,          \ CURRENT ITEM PRICE
+    TS.PC.PRICE2,          \ CURRENT ITEM PRICE2
+    TS.PC.OPRICE1,         \ ORIGINAL ITEM PRICE
+    TS.PC.OPRICE2          ! ORIGINAL ITEM PRICE2
+
+INTEGER*2  GLOBAL       \
+    TS.PC.CHANGENO         ! NO OF PRICE CHANGES
+
+INTEGER*2  GLOBAL       \
+    TS.PC.ADD,             \ RECORD ADD FLAG
+    TS.PC.SPLIT,           \ SPLIT FORMAT
+    TS.PC.L2,              \ 2 LINES REQ
+    TS.PC.PM,              \ PRICING METHOD
+    TS.PC.IT,              \ ITEM TYPE
+\AIR95357
+\   TS.PC.FLG(2)           ! FLAG FIELD ARRAY
+    TS.PC.FLG(2),          \ FLAG FIELD ARRAY
+    TS.PC.ALIAS            ! PRICE/CHANGE VERIFY ALIAS READ FLAG
+!EIR95357
+
+\ REM!!****************************************************************
+\ REM!!*  INITIALISATION SPECIFIC VARIABLES
+\ REM!!****************************************************************
+
+INTEGER*2 GLOBAL        \
+        TS.IN.IPL,      \ IPL IN PROGRESS
+        TS.TOTSEQL,     \ START HT SEQ AREA                      !IR82941
+        TS.NVRAM.BUFFSIZE, \ BUFFER SIZE FOR OPENING NVRAM        !IO08970
+        TS.CASHDRAWER,  \ CASH DRAWER AVAILABLE                   !IR74018
+        TS.TRANSFER     ! TERMINAL TRANSFER IN PROGRESS           !IR73064
+
+\ REM!!****************************************************************
+\ REM!!*  ERROR ROUTINE SPECIFIC VARIABLES
+\ REM!!****************************************************************
+
+!AIR72648 Extra TS.DS. vbls to print/display errors
+STRING GLOBAL           \
+        TS.TS11WERR$,   \ CBASIC ERROR CODE
+        TS.ERRSAV$(1),  \ STACKED CBASIC ERROR CODE
+        TS.ERRN$,       \ CBASIC ERRN IN ASCII
+        TS.DISPERR$     ! ERROR DISPLAY
+
+INTEGER*2 GLOBAL        \
+        TS.ERRF,        \ ERROR SESSION NUMBER
+        TS.ERRFSAV(1),  \ STACKED ERROR SESSION NUMBER
+        TS.ER.UNEX,     \ INDICATES UNEXPECTED ERROR HAS OCCURRED
+        TS.ER.RETURN    ! INDICATES WHETHER APPLICATION WISHES TO
+                        ! HANDLE ERROR LOCALLY
+
+INTEGER*2 GLOBAL        \
+        TS.ASYNRETRY,   \ INDICATES THAT ASYN ERROR RTN IS DOING RESUME
+                        \ RETRY BUT THERE MAY STILL BE AN ERROR
+        TS.ASYNCNT      ! COUNT OF NUMBER OF ENTRIES TO ASYNC ERROR
+                        ! ROUTINE
+                        ! SET BY ASYNC.ERROR, RESET BY PRINT INTERFACE
+
+INTEGER*4 GLOBAL        \
+        TS.ERRN,        \ THE INTEGER VARIABLE FOR ERRN RETURN
+        TS.ERRNSAV(1)   ! THE STACKED INTEGER VARIABLE FOR ERRN RETURN
+!EIR72648 Extra TS.DS. vbls to print/display errors
+
+!***********************************************************************
+!*        WORKING STORAGE THAT IS USED TO                              *
+!*        COMMUNICATE BETWEEN ITEM ENTRY AND THE TRANSACTION BUFFER    *
+!*        HANDLING ROUTINE.                                            *
+!***********************************************************************
+
+INTEGER*4 GLOBAL                \
+          TS.TOTRETPTR          ! START OF LAST HT RECORD WRITTEN
+
+INTEGER*2 GLOBAL                \
+          PRICING.METHOD,       \
+          NUMBER.SYSTEM,        \
+          COUPON.LEVEL          !
+
+STRING    GLOBAL                \
+          ITEMCODE$             !
+
+!***********************************************************************
+!*        COUPON VALIDATION TOTALS                                     *
+!*                                                                     *
+!*        TOTALS ARE ACCUMULATED FOR THE FOLLOWING ITEM TYPES          *
+!*        ONLY:                                                        *
+!*                                                                     *
+!*        - ITEM SALES                                                 *
+!*        - MANUFACTURER COUPONS                                       *
+!*        - STORE COUPONS                                              *
+!*        - COUPON MULTIPLIERS                                         *
+!*                                                                     *
+!*        CANCELS OF ANY OF THE ABOVE ITEM TYPES ARE ALSO              *
+!*        ACCUMULATED.                                                 *
+!*                                                                     *
+!*        INDEX 1; 0 = EXACT FAMILY GROUP NUMBER MATCH                 *
+!*                 1 = FIRST TWO DIGITS OF GROUP NUMBER MATCH          *
+!*                 2 = FIRST DIGIT IF GROUP NUMBER MATCH               *
+!*                 3 = MANUFACTURER NUMBER ONLY MATCHES                *
+!*                                                                     *
+!*        INDEX 2; 0 = TOTAL OF ENTRIES                                *
+!*                 1 = TOTAL UNDER TAX PLAN A                          *
+!*                 2 = TOTAL UNDER TAX PLAN B                          *
+!*                 3 = TOTAL UNDER TAX PLAN C                          *
+!*                 4 = TOTAL UNDER TAX PLAN D                          *
+!*                 5 = TOTAL NON-FOODSTAMPABLE                         *
+!*                 6 = TOTAL NON-DISCOUNTABLE                          *
+!*                                                                     *
+!*        FOR COUPON.AMOUNTS, THE TOTAL SALES AMOUNT LESS THE          *
+!*        TOTAL COUPON AMOUNT IS ACCUMULATED.  BUT FOR                 *
+!*        COUPON.QUANTITIES, THE QUANTITIES ARE ACCUMULATED            *
+!*        SEPARATELY:                                                  *
+!*                                                                     *
+!*        INDEX 3; 0 = TOTAL OF ITEM SALES                             *
+!*                 1 = TOTAL OF MANUFACTURER COUPONS                   *
+!*                 2 = TOTAL OF STORE COUPONS                          *
+!*                                                                     *
+!***********************************************************************
+
+INTEGER*4 GLOBAL COUPON.AMOUNTS(2)
+INTEGER*2 GLOBAL COUPON.QUANTITIES(3)
+
+INTEGER*2 GLOBAL COUPON.MULTIPLICATION.ALLOWED
+STRING    GLOBAL TS.FOLLOWING.RECORD$
+
+\ REM!!****************************************************************
+\ REM!!*  WORK FIELDS
+\ REM!!****************************************************************
+                        !
+STRING GLOBAL           \
+        A$,B$,C$,D$,E$,F$,G$,H$,I$,J$
+
+INTEGER*2 GLOBAL        \
+    I%, J%, K%, L%, M%, N%   !LOOP VARIABLES
+
+INTEGER*2  GLOBAL       \
+    TS.TEMP1I1,         \
+    TS.TEMP2I1,         \
+    TS.TEMP3I1,         \
+    TS.TEMP4I1,         \
+    TS.TEMP5I1          !
+
+INTEGER*2  GLOBAL       \
+    TS.TEMP1I2,         \
+    TS.TEMP2I2,         \
+    TS.TEMP3I2,         \
+    TS.TEMP4I2,         \
+    TS.TEMP5I2          !
+
+INTEGER*4  GLOBAL       \
+    TS.TEMP1I4,         \
+    TS.TEMP2I4,         \
+    TS.TEMP3I4,         \
+    TS.TEMP4I4,         \
+    TS.TEMP5I4          !
+
+STRING     GLOBAL       \
+    ZEROES$,            \
+    BLANK$,             \
+    TS.TEMP$(1),        \
+    TS.TEMP1$,          \
+    TS.TEMP2$,          \
+    TS.TEMP3$,          \
+    TS.TEMP4$,          \
+    TS.TEMP5$,          \
+    TS.TEMP6$,          \
+    TS.LOGDATA$         ! what's this??? comments please!
+
+\*********************************************************************
+\*      EFT/EXTERNAL/INTERNAL VERIFICATION VARIABLES.                *
+\*********************************************************************
+
+ INTEGER*4 GLOBAL       \
+ TS.HT.AMTTAX(1),       \ total tax for transaction/session
+ TS.HT.AMTSALE(1)       ! total taxable amount for tx/sess
+
+\*********************************************************************
+\*      EFT/EXTERNAL/INTERNAL VERIFICATION VARIABLES.                *
+\*********************************************************************
+\*                                                                   *
+\*      The following variables are used to hold data read/received  *
+\*      as part of tender verification.                              *
+\*                                                                   *
+\*********************************************************************
+
+STRING    GLOBAL                \
+         TS.VF.KEY$             ! key for EAMTENDV read (type + ac#)
+
+INTEGER*4 GLOBAL                \
+         TS.VF.MAXTRANS,        \ long verif: max trx limit
+         TS.VF.LIMTRANS         !             sum of trx's limit
+
+INTEGER*4 GLOBAL                \
+         TS.VF.AMTTRANS         ! customer status field: amt of tdrs
+
+INTEGER*4 GLOBAL                \
+         TS.VF.NUMTRANS         ! customer status field: no. of tdrs
+
+INTEGER*4 GLOBAL                \
+         TS.VF.PIPEID           ! upbound ext ver pipe id
+
+INTEGER*2 GLOBAL                \
+         TS.AUTOVOID            ! automatic void of tender at void trx
+
+\*********************************************************************
+\*      SUMMARY LOG ARRAY                                            *
+\*********************************************************************
+\*      This array is the largest data element in the terminal,      *
+\*      containing up to 1000 items! It is dimensioned using the     *
+\*      global constant GC.SL.SIZE                                   *
+\*********************************************************************
+STRING GLOBAL                   \
+         SL.STR$(1)             ! summary log string
+
+\*********************************************************************
+\*      USER EXIT FIELDS                                             *
+\*********************************************************************
+INTEGER*2 GLOBAL                \
+         TS.USER.RETURN         ! user exit work field
+
+INTEGER*4 GLOBAL                \
+         TS.USEREXIT            ! user parameter area
+
+STRING    GLOBAL                \
+         TS.USERDATA$,          \ user data to be logged
+         TS.SJDATA$,            \ first 20 bytes of SJ data for exit
+         TS.PRDATA$             ! print data passed to user exits
+
+\*********************************************************************
+\*      TRACE ARRAY                                                  *
+\*********************************************************************
+INTEGER*2 GLOBAL                \
+         TS.TRACE(1)
+
+\**********************************************************************
+\* The following defines the terminal record format as of the last    *
+\* access for replacing in a new master.                              *
+\**********************************************************************
+
+ STRING GLOBAL \
+        TS.SV.TRANSNUM$         ! TRANSACTION NUMBER OF CURRENT UPD 2
+                                ! OR MOST RECENT TRANSACTION
+
+ INTEGER*2 GLOBAL \
+        TS.SV.NUMLOANS          ! NUMBER OF LOANS TO THIS TILL  INT 2
+
+ INTEGER*4 GLOBAL \
+        TS.SV.AMTLOANS          ! AMOUNT OF LOANS TO THIS TILL  INT 4
+
+ INTEGER*2 GLOBAL \
+        TS.SV.NUMPKUPS          ! NUMBER OF PICKUPS FROM TILL   INT 2
+
+ INTEGER*4 GLOBAL \
+        TS.SV.AMTPKUPS          ! AMOUNT OF PICKUPS FROM TILL   INT 4
+
+!**********************************************************************
+!* the following represent the net totals for this sign-on session    *
+!**********************************************************************
+
+ INTEGER*4 GLOBAL \
+        TS.SV.GROSSPOS,         \ GROSS POSITIVE - ACCUMULATION INT 4
+                                \ OF THE POSITIVE SALES ENTRIES.
+                                \ INCLUDES STAND-ALONE TOTALS BUT NO
+                                \ TOTALS FROM VOIDED OR TRAINING
+                                \ TRANSACTIONS. (SALES + DEPOSITS +
+                                \ TAXES + TENDER FEES)
+                                \
+        TS.SV.GROSSNEG,         \ GROSS NEGATIVE - ACCUMULATION INT 4
+                                \ OF THE NEGATIVE SALES ENTRIES.
+                                \ INCLUDES STAND-ALONE  BUT NO
+                                \ TOTALS FROM VOIDED OR TRAINING
+                                \ TRANSACTIONS. NOTE THIS IS A
+                                \ POSITIVE AMOUNT.
+                                \ ITEM REFUNDS, TAX REFUNDS,
+                                \ CANCELS OF SALES, DEPOSITS,
+                                \ DEPOSIT RETURNS AND TENDER FEES
+                                \
+        TS.SV.AMTMISCS          ! AMOUNT OF MISCELLANEOUS ITEM  INT 4
+                                ! RECORD ENTRIES
+
+ INTEGER*2 GLOBAL \
+        TS.SV.NUMTRANS          ! NUMBER OF SALES TRANSACTION   INT 2
+
+
+!**********************************************************************
+!* The following represent the till contents as of the end of the     *
+!* last session                                                       *
+!**********************************************************************
+
+ INTEGER*4 GLOBAL \
+        TS.SV.AMT(1)            \ ENTERED TENDER 1-CASH         INT 4
+                                \ 2-CHECKS                      INT 4
+                                \ 3-FOOD STAMPS                 INT 4
+                                \ 4-MISCELLANEOUS TENDER 1      INT 4
+                                \ 5-MISCELLANEOUS TENDER 2      INT 4
+                                \ 6-MISCELLANEOUS TENDER 3      INT 4
+                                \ 7-MANUFACTURER COUPONS        INT 4
+                                ! 8-STORE COUPONS               INT 4
+
+\**********************************************************************
+\* The following defines the operator status at last signon when      *
+\* status file could be accessed                                      *
+\**********************************************************************
+
+ INTEGER*2 GLOBAL \
+        TS.OP.NUMLOANS          ! NUMBER OF LOANS TO THIS TILL  INT 2
+
+ INTEGER*4 GLOBAL \
+        TS.OP.AMTLOANS          ! AMOUNT OF LOANS TO THIS TILL  INT 4
+
+ INTEGER*2 GLOBAL \
+        TS.OP.NUMPKUPS          ! NUMBER OF PICKUPS FROM TILL   INT 2
+
+ INTEGER*4 GLOBAL \
+        TS.OP.AMTPKUPS          ! AMOUNT OF PICKUPS FROM TILL   INT 4
+
+ INTEGER*4 GLOBAL \
+        TS.OP.AMT(1)            ! ENTERED TENDER                INT 4
+
+\ REM!!****************************************************************
+\ REM!!*  VARIABLE FOR DETERMINING THAT DATA ENTRY WAS VALID
+\ REM!!****************************************************************
+
+INTEGER*2 GLOBAL                \
+        TS.DATAENTRY.VALID      ! DATA ENTRY O.K.
+
+\ REM!!****************************************************************
+\ REM!!*  VARIABLE FOR TENDER VERIFICATION
+\ REM!!****************************************************************
+
+!IR74941 add TS.CUSTA.EXIST so that CSEC02 will know if EAMCUSTA exists
+!        before trying the read
+INTEGER*2 GLOBAL                \
+        TS.CUSTA.EXIST,         \ READ CUSTA RECORD ONLY IF FILE EXISTS !IR74941
+        TS.CUSTA.READ           ! CUSTA RECORD READ IN CSEC02
+
+INTEGER*4 GLOBAL                \
+        TS.CUSTA.SV.USER        ! SAVED USER FIELD FROM CUSTA
+
+!AIR70126
+\ REM!!****************************************************************
+\ REM!!*  VARIABLE FOR DATE AND TIME OF LAST CLOSE OF REPORTING PERIOD
+\ REM!!****************************************************************
+
+STRING    GLOBAL                \
+        TS.LAST.CLOSE$          ! DATE AND TIME (PACKED) YYMMDDhhmm
+!EIR70126
+
+\ REM!!****************************************************************
+\ REM!!*  MISCELLANEOUS VARIABLES
+\ REM!!****************************************************************
+
+!AIR75271
+INTEGER*2 GLOBAL TS.IN.BACKUP   !used to indicate loop backup to user ex
+!EIR75271
+
+!AIR80572
+INTEGER*2 GLOBAL TS.TLOG.CLEAR  ! Flag to bypass redimension of TLOG array
+!EIR80572                       ! for use in user exit 2
+
+!AIR80607
+STRING    GLOBAL SL.STR.ENTRY$  ! contains transaction string about to be
+!EIR80607                       ! processed before calling user exit 53
+
+!AIR88902
+INTEGER*1 GLOBAL TONE.ON%       ! flag set if continuous "ON" tone has
+!EIR88902                       !   been issued in TSUPEC25
+
+!AIR89353  -  New Global Variables
+INTEGER*2 GLOBAL ITEM.COUNT     ! Counts number of items in a transaction
+
+INTEGER*1 GLOBAL BYPASS.REPRINT%  ! Flag  = 0 if normal reprint handling
+                                  !       = 1 to bypass reprint
+
+INTEGER*1 GLOBAL ERR27.ROUTINE%   ! Flag  = 0 if Exit 27 called from ON ERROR
+                                  !       = 1 if Exit 27 called from ON ASYNC
+
+STRING    GLOBAL REPRINT.OVERLAY$ ! The Reprint Overlay Descriptor
+
+STRING    GLOBAL TOTAL.ITEM.DESC$ ! Total items message descriptor
+
+! Moved the following variables from EAMTS11C - made Global
+!AIR95928 new GLOBAL variables weren't really GLOBAL.  Made them so.
+!INTEGER*2  ASYNC.ERRN             ! Space for ERRN
+!INTEGER*2  DVICE                  ! Device With Problem
+!                                  !   90 (144) - Printer
+!                                  !   A2 (162) - Coin Dispenser
+!                                  !   98 (152) - Serial OEM
+!STRING     TER                    ! Initial Error
+
+INTEGER*2  GLOBAL ASYNC.ERRN      ! Space for ERRN
+INTEGER*2  GLOBAL DVICE           ! Device With Problem
+                                  !   90 (144) - Printer
+                                  !   A2 (162) - Coin Dispenser
+                                  !   98 (152) - Serial OEM
+STRING     GLOBAL TER             ! Initial Error
+!EIR95928
+!EIR89353
+
+!AIR91030 Added new GLOBAL variables for Model 3 plug compatibility
+!         and new function
+INTEGER*1 GLOBAL                  \
+     MOD3.ENABLE                  ! Is a Model 3 attached and configured?
+
+INTEGER*1 GLOBAL                  \
+     GUIL.ENABLE                  ! Is a Guillotine attached and configured?
+!EIR91030
+!AENH01
+INTEGER*1 GLOBAL                  \
+     VPLI.TRAN                    ! void previous by line item trans
+!EENH01
+
+!AIO00464
+INTEGER*2 GLOBAL                  \
+          WE.WIC.QTY(1),          \ WIC INTEGER ARRAY
+          WE.WIC.EBT.TENDERED,    \ FLAG WIC TENDER COMPLETED
+          TS.SERIAL.BAUDRATE      ! variable setting for opening the serial port baudrate
+!EIO00464
+
+
